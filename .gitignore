@@ -1,0 +1,7 @@
+*.vsix
+.vscode-test/
+.vscode/settings.json
+.vscode/settings.local.json
+dist
+node_modules
+out
