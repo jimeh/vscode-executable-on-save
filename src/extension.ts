@@ -1,26 +1,56 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+import { chmod, stat } from "node:fs/promises";
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+const CONFIG_SECTION = "markExecutableOnSave";
+const CONFIG_ENABLE_KEY = "enableShebangMarking";
+
 export function activate(context: vscode.ExtensionContext) {
+  const subscription = vscode.workspace.onDidSaveTextDocument(
+    async (document) => {
+      try {
+        await handleDocumentSave(document);
+      } catch (error) {
+        console.error("[mark-executable-on-save]", error);
+      }
+    }
+  );
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "mark-executable-on-save" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('mark-executable-on-save.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from mark-executable-on-save!');
-	});
-
-	context.subscriptions.push(disposable);
+  context.subscriptions.push(subscription);
 }
 
-// This method is called when your extension is deactivated
+async function handleDocumentSave(document: vscode.TextDocument) {
+  if (process.platform === "win32") {
+    return;
+  }
+
+  if (document.isUntitled || document.uri.scheme !== "file") {
+    return;
+  }
+
+  const config = vscode.workspace.getConfiguration(
+    CONFIG_SECTION,
+    document.uri
+  );
+  const enabled = config.get<boolean>(CONFIG_ENABLE_KEY, true);
+  if (!enabled) {
+    return;
+  }
+
+  const filePath = document.uri.fsPath;
+  const fileStat = await stat(filePath);
+  if ((fileStat.mode & 0o111) !== 0) {
+    return;
+  }
+
+  const prefixRange = document.validateRange(
+    new vscode.Range(new vscode.Position(0, 0), new vscode.Position(0, 2))
+  );
+  const prefix = document.getText(prefixRange);
+  if (prefix !== "#!") {
+    return;
+  }
+
+  await chmod(filePath, fileStat.mode | 0o111);
+}
+
 export function deactivate() {}
