@@ -21,6 +21,15 @@
           "type": "boolean",
           "default": true,
           "description": "Mark files beginning with #! as executable on save."
+        },
+        "markExecutableOnSave.permissionStrategy": {
+          "type": "string",
+          "enum": [
+            "standard",
+            "safe"
+          ],
+          "default": "safe",
+          "description": "Permission strategy: 'standard' adds execute for all (user, group, other), 'safe' only adds execute where read permission exists."
         }
       }
     }
