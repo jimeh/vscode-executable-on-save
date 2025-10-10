@@ -31,7 +31,7 @@ npm install
 npm run watch            # Continuous rebuild + type checking
 npm run compile          # Full build with lint and type checks
 npm run lint             # Run prettier + eslint checks
-npm run lint:fix         # Auto-fix linting issues
+npm run lint:fix         # Format with prettier and auto-fix eslint errors
 node esbuild.js          # Quick rebuild only
 node esbuild.js --watch  # Incremental rebuilds
 ```
@@ -74,6 +74,12 @@ single file:
 - Externalizes `vscode` module
 - Production mode: minified, no sourcemaps
 - Watch mode: includes custom problem matcher for VS Code integration
+
+### Development Cycle
+
+After making changes, always format and auto-correct linting complaints followed
+by running tests. Refer to the development commands section above for how to run
+those operations.
 
 ### Configuration
 
