@@ -51,7 +51,7 @@ puts "Automatically executable!"
 
 ### Enable/Disable
 
-Control whether the extension operates:
+Control whether the extension operates when saving a file:
 
 ```json
 {
