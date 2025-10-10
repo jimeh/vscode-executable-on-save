@@ -8,6 +8,7 @@ import sinon from "sinon";
 const CONFIG_SECTION = "markExecutableOnSave";
 const CONFIG_ENABLE_KEY = "enableShebangMarking";
 const CONFIG_PERMISSION_STRATEGY_KEY = "permissionStrategy";
+const CONFIG_SILENT_KEY = "silent";
 
 async function waitFor(
   predicate: () => Promise<boolean>,
@@ -36,9 +37,11 @@ interface TestCase {
   initialMode: number;
   configEnabled: boolean;
   permissionStrategy: "standard" | "safe";
+  silent?: boolean;
   expectedExecutable: boolean;
   shouldChangeMode: boolean;
   expectedMode?: number; // For specific mode testing
+  expectedNotificationMessage?: string;
 }
 
 suite("Mark executable on save", () => {
@@ -49,6 +52,8 @@ suite("Mark executable on save", () => {
   let sandbox: sinon.SinonSandbox;
   let configEnabled = true;
   let permissionStrategy: "standard" | "safe" = "safe";
+  let silent = false;
+  let showInformationMessageStub: sinon.SinonStub;
 
   setup(() => {
     sandbox = sinon.createSandbox();
@@ -66,6 +71,9 @@ suite("Mark executable on save", () => {
               if (key === CONFIG_PERMISSION_STRATEGY_KEY) {
                 return permissionStrategy as unknown as T;
               }
+              if (key === CONFIG_SILENT_KEY) {
+                return silent as unknown as T;
+              }
               return defaultValue as T;
             },
           };
@@ -74,10 +82,15 @@ suite("Mark executable on save", () => {
 
         return originalGetConfiguration.call(vscode.workspace, section, scope);
       });
+
+    showInformationMessageStub = sandbox
+      .stub(vscode.window, "showInformationMessage")
+      .resolves(undefined as unknown as vscode.MessageItem);
   });
 
   teardown(() => {
     sandbox.restore();
+    silent = false;
   });
 
   const testCases: TestCase[] = [
@@ -225,12 +238,37 @@ suite("Mark executable on save", () => {
       shouldChangeMode: true,
       expectedMode: 0o711, // rw-+---+--- becomes rwx+--x+--x
     },
+    {
+      name: "displays notification when permissions change and silent is false",
+      content: '#!/usr/bin/env bash\necho "hello"\n',
+      initialMode: 0o644,
+      configEnabled: true,
+      permissionStrategy: "safe",
+      silent: false,
+      expectedExecutable: true,
+      shouldChangeMode: true,
+      expectedMode: 0o755,
+      expectedNotificationMessage: "test-script: Made executable (644 -> 755)",
+    },
+    {
+      name: "suppresses notification when silent is enabled",
+      content: '#!/usr/bin/env bash\necho "hello"\n',
+      initialMode: 0o644,
+      configEnabled: true,
+      permissionStrategy: "safe",
+      silent: true,
+      expectedExecutable: true,
+      shouldChangeMode: true,
+      expectedMode: 0o755,
+    },
   ];
 
   testCases.forEach((testCase) => {
     test(testCase.name, async () => {
       configEnabled = testCase.configEnabled;
       permissionStrategy = testCase.permissionStrategy;
+      silent = testCase.silent ?? false;
+      showInformationMessageStub.resetHistory();
 
       const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
       const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
@@ -292,6 +330,22 @@ suite("Mark executable on save", () => {
           finalMode,
           testCase.expectedMode,
           `File mode should be 0o${testCase.expectedMode.toString(8)}, but got 0o${finalMode.toString(8)}`
+        );
+      }
+
+      const expectedNotificationCalls =
+        testCase.shouldChangeMode && !(testCase.silent ?? false) ? 1 : 0;
+      assert.strictEqual(
+        showInformationMessageStub.callCount,
+        expectedNotificationCalls,
+        "Unexpected number of information messages"
+      );
+
+      if (testCase.expectedNotificationMessage !== undefined) {
+        assert.strictEqual(
+          showInformationMessageStub.firstCall?.args?.[0],
+          testCase.expectedNotificationMessage,
+          "Notification message should match expected value"
         );
       }
 
