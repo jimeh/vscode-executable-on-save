@@ -23,7 +23,7 @@
     "configuration": {
       "title": "Mark Executable on Save",
       "properties": {
-        "markExecutableOnSave.enableOnSave": {
+        "markExecutableOnSave.enabled": {
           "type": "boolean",
           "default": true,
           "description": "Mark files beginning with #! as executable on save."

@@ -85,7 +85,7 @@ those operations.
 
 Two settings in [package.json](package.json):
 
-- `markExecutableOnSave.enableOnSave` (boolean, default: true)
+- `markExecutableOnSave.enabled` (boolean, default: true)
 - `markExecutableOnSave.permissionStrategy` (enum: "safe"|"standard",
   default: "safe")
 

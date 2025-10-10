@@ -11,8 +11,8 @@ Automatically marks files with shebangs as executable when saved in VS Code.
 ## What It Does
 
 When you save a file that starts with `#!` (a shebang), this extension
-automatically runs `chmod +x` on it. No more manually making your shell
-scripts, Python scripts, or other executable files runnable.
+automatically runs `chmod +x` on it. No more manually making your shell scripts,
+Python scripts, or other executable files runnable.
 
 ## Installation
 
@@ -51,11 +51,11 @@ puts "Automatically executable!"
 
 ### Enable/Disable
 
-Control whether the extension operates when saving a file:
+Control whether the extension runs when saving a file:
 
 ```json
 {
-  "markExecutableOnSave.enableOnSave": true
+  "markExecutableOnSave.enabled": true
 }
 ```
 
@@ -63,7 +63,7 @@ Default: `true`
 
 ### Permission Strategy
 
-Choose how execute permissions are added:
+Choose how the execute permissions are added:
 
 ```json
 {
@@ -116,10 +116,10 @@ Set to `true` to suppress notifications altogether.
 
 Mark the current file as executable via Command Palette:
 
-**Mark Executable If Script**
+### Mark Executable If Script
 
-Checks for shebang and applies permissions manually, respecting the
-configured strategy.
+Checks for shebang and applies permissions manually, respecting the configured
+strategy.
 
 ## Platform Support
 
@@ -146,8 +146,7 @@ configured strategy.
 
 ### Permission denied errors
 
-The extension needs write access to modify file permissions. Errors are
-logged but won't interrupt your workflow.
+The extension needs write access to modify file permissions.
 
 ## Privacy
 

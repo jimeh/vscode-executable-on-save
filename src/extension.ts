@@ -48,7 +48,7 @@ function readConfiguration(document: vscode.TextDocument): ExtensionConfig {
   );
 
   return {
-    enabled: config.get<boolean>("enableOnSave", true),
+    enabled: config.get<boolean>("enabled", true),
     strategy: config.get<PermissionStrategy>("permissionStrategy", "safe"),
     silent: config.get<boolean>("silent", false),
     silentErrors: config.get<boolean>("silentErrors", false),
