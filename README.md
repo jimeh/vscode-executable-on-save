@@ -1,4 +1,10 @@
+<div align="center>
+
 # Mark Executable on Save
+
+_Marking scripts executable should not require a terminal._
+
+</div>
 
 Automatically marks files with shebangs as executable when saved in VS Code.
 
@@ -66,6 +72,7 @@ Choose how execute permissions are added:
 ```
 
 Options:
+
 - `"safe"` (default): Adds execute only where read permission exists
 - `"standard"`: Adds execute for user, group, and other unconditionally
 
@@ -73,10 +80,10 @@ Options:
 
 Maintains permission symmetry by only adding execute where read exists:
 
-| Before      | After       | Description                    |
-|-------------|-------------|--------------------------------|
-| `rw-r--r--` | `rwxr-xr-x` | Standard file permissions      |
-| `rw-------` | `rwx------` | Private file stays private     |
+| Before      | After       | Description                             |
+| ----------- | ----------- | --------------------------------------- |
+| `rw-r--r--` | `rwxr-xr-x` | Standard file permissions               |
+| `rw-------` | `rwx------` | Private file stays private              |
 | `rw-r-----` | `rwxr-x---` | Group-readable becomes group-executable |
 
 Technical: shifts read bits right by 2 positions to derive execute bits.
@@ -85,13 +92,25 @@ Technical: shifts read bits right by 2 positions to derive execute bits.
 
 Always adds execute for all three permission groups:
 
-| Before      | After       | Description                    |
-|-------------|-------------|--------------------------------|
-| `rw-r--r--` | `rwxr-xr-x` | Standard file permissions      |
-| `rw-------` | `rwx--x--x` | Others gain execute access     |
-| `rw-r-----` | `rwxr-x--x` | Others gain execute access     |
+| Before      | After       | Description                |
+| ----------- | ----------- | -------------------------- |
+| `rw-r--r--` | `rwxr-xr-x` | Standard file permissions  |
+| `rw-------` | `rwx--x--x` | Others gain execute access |
+| `rw-r-----` | `rwxr-x--x` | Others gain execute access |
 
 Technical: performs bitwise OR with `0o111`.
+
+### Silent Mode
+
+Disable information popups when permissions change:
+
+```json
+{
+  "markExecutableOnSave.silent": false
+}
+```
+
+Set to `true` to suppress notifications altogether.
 
 ## Manual Command
 
@@ -133,6 +152,7 @@ logged but won't interrupt your workflow.
 ## Privacy
 
 This extension:
+
 - Only reads the first two characters of saved files
 - Only modifies file permissions, never file content
 - Does not send any data anywhere

@@ -36,6 +36,11 @@
           ],
           "default": "safe",
           "description": "Permission strategy: 'standard' adds execute for all (user, group, other), 'safe' only adds execute where read permission exists."
+        },
+        "markExecutableOnSave.silent": {
+          "type": "boolean",
+          "default": false,
+          "description": "Suppress information notifications when permissions change."
         }
       }
     }
