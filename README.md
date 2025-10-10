@@ -55,7 +55,7 @@ Control whether the extension operates:
 
 ```json
 {
-  "markExecutableOnSave.enableShebangMarking": true
+  "markExecutableOnSave.enableOnSave": true
 }
 ```
 

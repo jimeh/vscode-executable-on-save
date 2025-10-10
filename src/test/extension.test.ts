@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import sinon from "sinon";
 
 const CONFIG_SECTION = "markExecutableOnSave";
-const CONFIG_ENABLE_KEY = "enableShebangMarking";
+const CONFIG_ENABLE_KEY = "enableOnSave";
 const CONFIG_PERMISSION_STRATEGY_KEY = "permissionStrategy";
 const CONFIG_SILENT_KEY = "silent";
 

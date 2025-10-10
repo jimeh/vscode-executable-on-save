@@ -3,7 +3,7 @@ import { chmod, stat } from "node:fs/promises";
 import { basename, relative } from "node:path";
 
 const CONFIG_SECTION = "markExecutableOnSave";
-const CONFIG_ENABLE_KEY = "enableShebangMarking";
+const CONFIG_ENABLE_KEY = "enableOnSave";
 const CONFIG_PERMISSION_STRATEGY_KEY = "permissionStrategy";
 const CONFIG_SILENT_KEY = "silent";
 

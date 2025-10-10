@@ -79,7 +79,7 @@ single file:
 
 Two settings in [package.json](package.json):
 
-- `markExecutableOnSave.enableShebangMarking` (boolean, default: true)
+- `markExecutableOnSave.enableOnSave` (boolean, default: true)
 - `markExecutableOnSave.permissionStrategy` (enum: "safe"|"standard",
   default: "safe")
 
