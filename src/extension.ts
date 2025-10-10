@@ -64,7 +64,7 @@ async function makeExecutableIfScript(doc: vscode.TextDocument) {
     await handleDocument(doc);
   } catch (error: any) {
     const config = readConfiguration(doc);
-    await reportError(doc, error, config);
+    void reportError(doc, error, config);
   }
 }
 
@@ -100,7 +100,7 @@ async function handleDocument(document: vscode.TextDocument) {
 
   if (!config.silent) {
     const permissionMode = newMode & 0o777;
-    await announceModeChange(document, oldMode, permissionMode);
+    void announceModeChange(document, oldMode, permissionMode);
   }
 }
 

@@ -4,7 +4,7 @@
   "description": "Mark files as executable (chmod +x) on save if they starts with `#!`.",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.104.0"
+    "vscode": "^1.99.0"
   },
   "categories": [
     "Other"
@@ -71,7 +71,7 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "@types/sinon": "^17.0.4",
-    "@types/vscode": "^1.104.0",
+    "@types/vscode": "^1.99.0",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
     "@typescript-eslint/parser": "^8.42.0",
     "@vscode/test-cli": "^0.0.11",

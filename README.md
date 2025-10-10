@@ -158,10 +158,6 @@ This extension:
 - Does not send any data anywhere
 - Operates entirely locally
 
-## Development
-
-See [AGENTS.md](AGENTS.md) for development documentation.
-
 ## License
 
 [Insert license here]
