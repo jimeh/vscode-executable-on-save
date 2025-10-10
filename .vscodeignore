@@ -3,12 +3,17 @@
 **/.vscode-test.*
 **/eslint.config.mjs
 **/tsconfig.json
+.cursor/**
+.github/**
 .gitignore
+.prettierignore
 .vscode-test/**
 .vscode/**
 .yarnrc
 AGENTS.md
+CLAUDE.md
 esbuild.js
+mise.toml
 node_modules/**
 out/**
 src/**
