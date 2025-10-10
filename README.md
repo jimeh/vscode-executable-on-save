@@ -1,71 +1,156 @@
-# mark-executable-on-save README
+# Mark Executable on Save
 
-This is the README for your extension "mark-executable-on-save". After writing up a brief description, we recommend including the following sections.
+Automatically marks files with shebangs as executable when saved in VS Code.
 
-## Features
+## What It Does
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+When you save a file that starts with `#!` (a shebang), this extension
+automatically runs `chmod +x` on it. No more manually making your shell
+scripts, Python scripts, or other executable files runnable.
 
-For example if there is an image subfolder under your extension project workspace:
+## Installation
 
-\!\[feature X\]\(images/feature-x.png\)
+Install from the VS Code marketplace or via the command line:
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+```bash
+code --install-extension mark-executable-on-save
+```
 
-## Requirements
+## How It Works
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+The extension watches for file saves. When a file is saved:
 
-## Extension Settings
+1. Checks if the first two characters are `#!`
+2. Checks if the file is already executable
+3. If not executable, applies the appropriate permissions
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+Works with any scripting language:
 
-For example:
+```bash
+#!/bin/bash
+echo "Automatically executable!"
+```
 
-This extension contributes the following settings:
+```python
+#!/usr/bin/env python3
+print("Automatically executable!")
+```
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+```ruby
+#!/usr/bin/env ruby
+puts "Automatically executable!"
+```
 
-## Known Issues
+## Configuration
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+### Enable/Disable
 
-## Release Notes
+Control whether the extension operates:
 
-Users appreciate release notes as you update your extension.
+```json
+{
+  "markExecutableOnSave.enableShebangMarking": true
+}
+```
 
-### 1.0.0
+Default: `true`
 
-Initial release of ...
+### Permission Strategy
 
-### 1.0.1
+Choose how execute permissions are added:
 
-Fixed issue #.
+```json
+{
+  "markExecutableOnSave.permissionStrategy": "safe"
+}
+```
 
-### 1.1.0
+Options:
+- `"safe"` (default): Adds execute only where read permission exists
+- `"standard"`: Adds execute for user, group, and other unconditionally
 
-Added features X, Y, and Z.
+#### Safe Strategy
 
----
+Maintains permission symmetry by only adding execute where read exists:
 
-## Following extension guidelines
+| Before      | After       | Description                    |
+|-------------|-------------|--------------------------------|
+| `rw-r--r--` | `rwxr-xr-x` | Standard file permissions      |
+| `rw-------` | `rwx------` | Private file stays private     |
+| `rw-r-----` | `rwxr-x---` | Group-readable becomes group-executable |
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+Technical: shifts read bits right by 2 positions to derive execute bits.
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+#### Standard Strategy
 
-## Working with Markdown
+Always adds execute for all three permission groups:
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+| Before      | After       | Description                    |
+|-------------|-------------|--------------------------------|
+| `rw-r--r--` | `rwxr-xr-x` | Standard file permissions      |
+| `rw-------` | `rwx--x--x` | Others gain execute access     |
+| `rw-r-----` | `rwxr-x--x` | Others gain execute access     |
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+Technical: performs bitwise OR with `0o111`.
 
-## For more information
+## Manual Command
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+Mark the current file as executable via Command Palette:
 
-**Enjoy!**
+**Mark Executable If Script**
+
+Checks for shebang and applies permissions manually, respecting the
+configured strategy.
+
+## Platform Support
+
+- **macOS**: Full support
+- **Linux**: Full support
+- **BSD**: Full support
+- **Windows**: Disabled (Windows uses different permission model)
+
+## Behavior Notes
+
+- Only processes files with `file://` URIs (ignores untitled documents)
+- Logs permission errors to Developer Console but doesn't show popups
+- Skips files that are already executable
+- Runs after every save, minimal performance impact
+
+## Troubleshooting
+
+### File not becoming executable
+
+1. Check Developer Console (`Help > Toggle Developer Tools`)
+2. Look for permission errors or configuration issues
+3. Verify the file starts with exactly `#!`
+4. Ensure the file is saved to disk (not an untitled document)
+
+### Permission denied errors
+
+The extension needs write access to modify file permissions. Errors are
+logged but won't interrupt your workflow.
+
+## Privacy
+
+This extension:
+- Only reads the first two characters of saved files
+- Only modifies file permissions, never file content
+- Does not send any data anywhere
+- Operates entirely locally
+
+## Development
+
+See [AGENTS.md](AGENTS.md) for development documentation.
+
+## License
+
+[Insert license here]
+
+## Changelog
+
+### 0.0.1 (Initial Release)
+
+- Automatic chmod +x on save for files with shebangs
+- Safe and standard permission strategies
+- Manual command support
+- Platform detection
