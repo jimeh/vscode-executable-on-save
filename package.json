@@ -41,6 +41,11 @@
           "type": "boolean",
           "default": false,
           "description": "Suppress information notifications when permissions change."
+        },
+        "markExecutableOnSave.silentErrors": {
+          "type": "boolean",
+          "default": false,
+          "description": "Suppress error notifications when permission updates fail."
         }
       }
     }

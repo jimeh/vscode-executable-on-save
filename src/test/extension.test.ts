@@ -4,6 +4,7 @@ import { chmod, mkdtemp, rm, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import sinon from "sinon";
+import { __testing } from "../extension";
 
 const CONFIG_SECTION = "markExecutableOnSave";
 const CONFIG_ENABLE_KEY = "enableOnSave";
@@ -354,6 +355,39 @@ suite("Mark executable on save", () => {
         "workbench.action.closeActiveEditor"
       );
       await rm(tempDir, { force: true, recursive: true });
+    });
+  });
+
+  suite("error notifications", () => {
+    test("shows error when notifications enabled", async () => {
+      const showErrorStub = sandbox
+        .stub(vscode.window, "showErrorMessage")
+        .resolves(undefined as unknown as vscode.MessageItem);
+
+      await __testing.showErrorMessage("failure", {
+        enabled: true,
+        strategy: "safe",
+        silent: false,
+        silentErrors: false,
+      });
+
+      sinon.assert.calledOnce(showErrorStub);
+      sinon.assert.calledWith(showErrorStub, "failure");
+    });
+
+    test("suppresses error when silentErrors enabled", async () => {
+      const showErrorStub = sandbox
+        .stub(vscode.window, "showErrorMessage")
+        .resolves(undefined as unknown as vscode.MessageItem);
+
+      await __testing.showErrorMessage("failure", {
+        enabled: true,
+        strategy: "safe",
+        silent: false,
+        silentErrors: true,
+      });
+
+      sinon.assert.notCalled(showErrorStub);
     });
   });
 

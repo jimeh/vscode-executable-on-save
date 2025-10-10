@@ -38,6 +38,7 @@ interface ExtensionConfig {
   enabled: boolean;
   strategy: PermissionStrategy;
   silent: boolean;
+  silentErrors: boolean;
 }
 
 function readConfiguration(document: vscode.TextDocument): ExtensionConfig {
@@ -50,6 +51,7 @@ function readConfiguration(document: vscode.TextDocument): ExtensionConfig {
     enabled: config.get<boolean>("enableOnSave", true),
     strategy: config.get<PermissionStrategy>("permissionStrategy", "safe"),
     silent: config.get<boolean>("silent", false),
+    silentErrors: config.get<boolean>("silentErrors", false),
   };
 }
 
@@ -61,7 +63,8 @@ async function makeExecutableIfScript(doc: vscode.TextDocument) {
   try {
     await handleDocument(doc);
   } catch (error: any) {
-    reportError(doc, error);
+    const config = readConfiguration(doc);
+    await reportError(doc, error, config);
   }
 }
 
@@ -149,25 +152,47 @@ function calculateNewMode(
 // Error reporting
 //
 
-function reportError(document: vscode.TextDocument, error: any) {
-  const filePath = document?.uri?.fsPath ?? "unknown";
+async function reportError(
+  document: vscode.TextDocument,
+  error: any,
+  config: ExtensionConfig
+): Promise<void> {
+  const uri = document?.uri;
+  const filePath = uri?.fsPath ?? "unknown";
+  const relativePath = uri ? formatRelativePath(uri) : filePath;
 
   if (error?.code === "EACCES") {
-    console.warn(
-      `[mark-executable-on-save] Permission denied for file: ${filePath}`
-    );
+    const message = `${relativePath}: Permission denied when updating permissions.`;
+    console.warn(`[mark-executable-on-save] ${message}`);
+    await showErrorMessage(message, config);
     return;
   }
 
   if (error?.code === "ENOENT") {
-    console.warn(`[mark-executable-on-save] File not found: ${filePath}`);
+    const message = `${relativePath}: File no longer exists.`;
+    console.warn(`[mark-executable-on-save] ${message}`);
+    await showErrorMessage(message, config);
     return;
   }
 
+  const details = error instanceof Error ? error.message : String(error);
+  const message = `${relativePath}: Unexpected error – ${details}`;
   console.error(
     `[mark-executable-on-save] Unexpected error for file ${filePath}:`,
     error
   );
+  await showErrorMessage(message, config);
+}
+
+async function showErrorMessage(
+  message: string,
+  config: ExtensionConfig
+): Promise<void> {
+  if (config.silent || config.silentErrors) {
+    return;
+  }
+
+  await vscode.window.showErrorMessage(message);
 }
 
 //
@@ -200,3 +225,7 @@ function formatRelativePath(uri: vscode.Uri): string {
 function formatMode(mode: number): string {
   return mode.toString(8).padStart(3, "0");
 }
+
+export const __testing = {
+  showErrorMessage,
+} as const;
