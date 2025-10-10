@@ -160,27 +160,29 @@ async function reportError(
   const uri = document?.uri;
   const filePath = uri?.fsPath ?? "unknown";
   const relativePath = uri ? formatRelativePath(uri) : filePath;
+  let message = `${relativePath}: Unexpected error.`;
 
-  if (error?.code === "EACCES") {
-    const message = `${relativePath}: Permission denied when updating permissions.`;
-    console.warn(`[mark-executable-on-save] ${message}`);
-    await showErrorMessage(message, config);
-    return;
+  switch (error?.code) {
+    case "EACCES":
+      message = `${relativePath}: Permission denied when updating permissions.`;
+      break;
+
+    case "ENOENT":
+      message = `${relativePath}: File no longer exists.`;
+      break;
+
+    default: {
+      const details = error instanceof Error ? error.message : String(error);
+      message = `${relativePath}: Unexpected error – ${details}`;
+      console.error(
+        `[mark-executable-on-save] Unexpected error for file ${filePath}:`,
+        error
+      );
+      break;
+    }
   }
 
-  if (error?.code === "ENOENT") {
-    const message = `${relativePath}: File no longer exists.`;
-    console.warn(`[mark-executable-on-save] ${message}`);
-    await showErrorMessage(message, config);
-    return;
-  }
-
-  const details = error instanceof Error ? error.message : String(error);
-  const message = `${relativePath}: Unexpected error – ${details}`;
-  console.error(
-    `[mark-executable-on-save] Unexpected error for file ${filePath}:`,
-    error
-  );
+  console.warn(`[mark-executable-on-save] ${message}`);
   await showErrorMessage(message, config);
 }
 
