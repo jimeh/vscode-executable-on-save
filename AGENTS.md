@@ -52,30 +52,67 @@ npm run package          # Minified production build
 
 ## Architecture
 
+The extension follows a modular architecture with clear separation of
+concerns:
+
 ### Extension Entry Point
 
-[src/extension.ts](src/extension.ts) contains all extension logic in a
-single file:
+[src/extension.ts](src/extension.ts) (~30 lines) - Minimal VS Code
+lifecycle hooks:
 
-- `activate()`: Registers `onDidSaveTextDocument` listener and the
-  `mark-executable-on-save.markExecutableIfScript` command
-- `makeExecutableIfScript()`: Entry point called on save or via command
-- `handleDocument()`: Main flow - checks platform, config, shebang, then
-  applies chmod
+- `activate()`: Registers save hook and manual command
+- `deactivate()`: Extension cleanup (empty)
+- Delegates all processing to `document-handler` module
+
+### Document Processing
+
+[src/document-handler.ts](src/document-handler.ts) (~100 lines) - Main
+processing logic:
+
+- `processDocument()`: Entry point called on save or via command
+- `handleDocument()`: Core flow - checks platform, config, shebang, applies
+  chmod
+- `shouldSkipDocument()`: Platform/document validation (Windows, untitled,
+  non-file URIs)
+- `readShebang()`: Reads first 2 characters for shebang detection
+- `startsWithShebang()`: Validates `#!` prefix
+
+### Configuration
+
+[src/config.ts](src/config.ts) (~35 lines) - Configuration management:
+
+- `Config` interface: Type-safe configuration structure
+- `readConfiguration()`: Reads workspace configuration with defaults
+
+### Permissions
+
+[src/permissions.ts](src/permissions.ts) (~45 lines) - Permission
+calculations:
+
 - `calculateNewMode()`: Core permission logic
-  - **safe strategy**: Only adds execute bits where corresponding read
-    bits exist (e.g., `0o644` → `0o755`, `0o600` → `0o700`)
+  - **safe strategy**: Only adds execute where read bits exist (e.g.,
+    `0o644` → `0o755`, `0o600` → `0o700`)
   - **standard strategy**: Always adds `0o111` (execute for all)
-- `reportError()`: Handles error messages with detailed logging for
-  EACCES/ENOENT/unexpected errors
-- `announceModeChange()`: Shows information notification with old/new
-  permission modes (unless silent mode is enabled)
-- Platform guard: Skips all processing on Windows
+  - Preserves special bits (setuid, setgid, sticky)
+- `isExecutable()`: Checks if mode has execute bits
+
+### Notifications
+
+[src/notifications.ts](src/notifications.ts) (~110 lines) - User feedback:
+
+- `announceModeChange()`: Shows info notification with mode change
+- `reportError()`: Handles errors with specific messages (EACCES, ENOENT,
+  etc.)
+- `showErrorMessage()`: Displays errors respecting silent config
+- Path formatting helpers for user-friendly messages
 
 ### Build System
 
-[esbuild.js](esbuild.js) bundles `src/extension.ts` → `dist/extension.js`:
+[esbuild.js](esbuild.js) bundles all `src/` modules → `dist/extension.js`:
 
+- Entry point: `src/extension.ts`
+- Bundles all modules together (extension, document-handler, config,
+  permissions, notifications)
 - Uses CommonJS format (`format: 'cjs'`)
 - Externalizes `vscode` module
 - Production mode: minified, no sourcemaps
@@ -87,7 +124,7 @@ After making changes, always format and auto-correct linting complaints followed
 by running tests. Refer to the development commands section above for how to run
 those operations.
 
-### Configuration
+### Extension Settings
 
 Four settings in [package.json](package.json):
 
@@ -101,15 +138,35 @@ Four settings in [package.json](package.json):
 
 ### Test Suite
 
-[src/test/extension.test.ts](src/test/extension.test.ts) uses Mocha +
-Sinon:
+Tests are organized by module with clear separation between unit and
+integration tests:
 
-- Tests run in VS Code's Electron environment via `@vscode/test-electron`
-- Stubs `vscode.workspace.getConfiguration()` to control test behavior
-- Creates temp files with specific modes, saves documents, verifies chmod
-  results
-- Covers: shebang detection, permission strategies, platform guards, URI
-  schemes
+**[src/test/extension.test.ts](src/test/extension.test.ts)** (24
+integration tests):
+
+- End-to-end tests using real files and VS Code APIs
+- Stubs `vscode.workspace.getConfiguration()` to control behavior
+- Creates temp files with specific modes, saves documents, verifies results
+- Covers: core flow, shebang edge cases, manual command, platform guards
+
+**[src/test/permissions.test.ts](src/test/permissions.test.ts)** (32 unit
+tests):
+
+- Pure unit tests for `calculateNewMode()` function
+- No VS Code dependencies
+- Tests all strategies, special bits, edge cases (write-only, etc.)
+- Fast, isolated tests
+
+**[src/test/notifications.test.ts](src/test/notifications.test.ts)** (13
+unit tests):
+
+- Unit tests for notification functions
+- Tests `showErrorMessage()`, `reportError()`, `announceModeChange()`
+- Stubs VS Code window APIs
+- Verifies error handling and message formatting
+
+All tests run in VS Code's Electron environment via
+`@vscode/test-electron`. Total: **67 tests**.
 
 ## Key Implementation Details
 
