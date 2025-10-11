@@ -57,13 +57,19 @@ npm run package          # Minified production build
 [src/extension.ts](src/extension.ts) contains all extension logic in a
 single file:
 
-- `activate()`: Registers `onDidSaveTextDocument` listener
-- `handleDocumentSave()`: Main flow - checks platform, config, shebang,
-  then applies chmod
+- `activate()`: Registers `onDidSaveTextDocument` listener and the
+  `mark-executable-on-save.markExecutableIfScript` command
+- `makeExecutableIfScript()`: Entry point called on save or via command
+- `handleDocument()`: Main flow - checks platform, config, shebang, then
+  applies chmod
 - `calculateNewMode()`: Core permission logic
-  - **safe strategy**: Only adds execute bits where corresponding read bits
-    exist (e.g., `0o644` → `0o755`, `0o600` → `0o700`)
+  - **safe strategy**: Only adds execute bits where corresponding read
+    bits exist (e.g., `0o644` → `0o755`, `0o600` → `0o700`)
   - **standard strategy**: Always adds `0o111` (execute for all)
+- `reportError()`: Handles error messages with detailed logging for
+  EACCES/ENOENT/unexpected errors
+- `announceModeChange()`: Shows information notification with old/new
+  permission modes (unless silent mode is enabled)
 - Platform guard: Skips all processing on Windows
 
 ### Build System
@@ -83,13 +89,17 @@ those operations.
 
 ### Configuration
 
-Two settings in [package.json](package.json):
+Four settings in [package.json](package.json):
 
 - `markExecutableOnSave.enabled` (boolean, default: true)
 - `markExecutableOnSave.permissionStrategy` (enum: "safe"|"standard",
   default: "safe")
+- `markExecutableOnSave.silent` (boolean, default: false) - suppresses
+  information notifications when permissions change
+- `markExecutableOnSave.silentErrors` (boolean, default: false) -
+  suppresses error notifications when permission updates fail
 
-### Testing
+### Test Suite
 
 [src/test/extension.test.ts](src/test/extension.test.ts) uses Mocha +
 Sinon:
@@ -109,9 +119,13 @@ Sinon:
    `mode & 0o111`
 3. **Safe strategy logic**: Shifts read bits right to derive execute bits,
    ensuring symmetry with read permissions
-4. **Error handling**: Logs EACCES/ENOENT to console; throws other errors
-   to avoid silent failures
-5. **Skip conditions**: Windows platform, untitled documents, non-file URIs
+4. **Error handling**: Logs all errors to console; shows error
+   notifications for EACCES/ENOENT/unexpected errors unless
+   `silentErrors` is enabled
+5. **Skip conditions**: Windows platform, untitled documents, non-file
+   URIs
+6. **Manual command**: Extension provides a command to manually mark the
+   active document executable if it has a shebang
 
 ## Release Checklist
 
