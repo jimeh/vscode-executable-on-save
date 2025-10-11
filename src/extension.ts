@@ -6,7 +6,7 @@ import { basename, relative } from "node:path";
 // Activation and deactivation
 //
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): void {
   const onSaveHook = vscode.workspace.onDidSaveTextDocument(
     makeExecutableIfScript
   );
@@ -26,7 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(onSaveHook, command);
 }
 
-export function deactivate() {}
+export function deactivate(): void {}
 
 //
 // Configuration
@@ -60,15 +60,18 @@ function readConfiguration(document: vscode.TextDocument): ExtensionConfig {
 //
 
 async function makeExecutableIfScript(doc: vscode.TextDocument) {
+  const config = readConfiguration(doc);
   try {
-    await handleDocument(doc);
+    await handleDocument(doc, config);
   } catch (error: any) {
-    const config = readConfiguration(doc);
     void reportError(doc, error, config);
   }
 }
 
-async function handleDocument(document: vscode.TextDocument) {
+async function handleDocument(
+  document: vscode.TextDocument,
+  config: ExtensionConfig
+) {
   if (shouldSkipDocument(document)) {
     return;
   }
@@ -85,7 +88,6 @@ async function handleDocument(document: vscode.TextDocument) {
     return;
   }
 
-  const config = readConfiguration(document);
   if (!config.enabled) {
     return;
   }

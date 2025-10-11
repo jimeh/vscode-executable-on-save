@@ -285,7 +285,7 @@ suite("Mark executable on save", () => {
       const initialExecutable = (initialStat.mode & 0o111) !== 0;
       assert.strictEqual(
         initialExecutable,
-        testCase.initialMode === 0o755,
+        (testCase.initialMode & 0o111) !== 0,
         "Initial executable state should match expectation"
       );
 

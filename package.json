@@ -17,7 +17,8 @@
     "commands": [
       {
         "command": "mark-executable-on-save.markExecutableIfScript",
-        "title": "Mark Executable If Script"
+        "title": "Mark Executable If Script",
+        "enablement": "editorIsOpen"
       }
     ],
     "configuration": {
