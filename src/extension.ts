@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
 import { chmod, stat } from "node:fs/promises";
-import { basename, relative } from "node:path";
+import { calculateNewMode, isExecutable } from "./permissions";
+import { announceModeChange, reportError } from "./notifications";
+import { type Config, readConfiguration } from "./config";
 
 //
 // Activation and deactivation
@@ -29,33 +31,6 @@ export function activate(context: vscode.ExtensionContext): void {
 export function deactivate(): void {}
 
 //
-// Configuration
-//
-
-type PermissionStrategy = "safe" | "standard";
-
-interface ExtensionConfig {
-  enabled: boolean;
-  strategy: PermissionStrategy;
-  silent: boolean;
-  silentErrors: boolean;
-}
-
-function readConfiguration(document: vscode.TextDocument): ExtensionConfig {
-  const config = vscode.workspace.getConfiguration(
-    "markExecutableOnSave",
-    document.uri
-  );
-
-  return {
-    enabled: config.get<boolean>("enabled", true),
-    strategy: config.get<PermissionStrategy>("permissionStrategy", "safe"),
-    silent: config.get<boolean>("silent", false),
-    silentErrors: config.get<boolean>("silentErrors", false),
-  };
-}
-
-//
 // Main flow
 //
 
@@ -68,10 +43,7 @@ async function makeExecutableIfScript(doc: vscode.TextDocument) {
   }
 }
 
-async function handleDocument(
-  document: vscode.TextDocument,
-  config: ExtensionConfig
-) {
+async function handleDocument(document: vscode.TextDocument, config: Config) {
   if (shouldSkipDocument(document)) {
     return;
   }
@@ -129,107 +101,3 @@ function readShebang(document: vscode.TextDocument): string {
 function startsWithShebang(prefix: string): boolean {
   return prefix.length === 2 && prefix === "#!";
 }
-
-function isExecutable(mode: number): boolean {
-  return (mode & 0o111) !== 0;
-}
-
-function calculateNewMode(
-  mode: number,
-  strategy: PermissionStrategy
-): number | null {
-  if (strategy === "safe") {
-    const readBits = mode & 0o444;
-    const executeBits = ((readBits >> 2) | (readBits >> 1) | readBits) & 0o111;
-    if (executeBits === 0) {
-      return null;
-    }
-    return mode | executeBits;
-  }
-
-  return mode | 0o111;
-}
-
-//
-// Error reporting
-//
-
-async function reportError(
-  document: vscode.TextDocument,
-  error: any,
-  config: ExtensionConfig
-): Promise<void> {
-  const uri = document?.uri;
-  const filePath = uri?.fsPath ?? "unknown";
-  const relativePath = uri ? formatRelativePath(uri) : filePath;
-  let message = `${relativePath}: Unexpected error.`;
-
-  switch (error?.code) {
-    case "EACCES":
-      message = `${relativePath}: Permission denied when updating permissions.`;
-      break;
-
-    case "ENOENT":
-      message = `${relativePath}: File no longer exists.`;
-      break;
-
-    default: {
-      const details = error instanceof Error ? error.message : String(error);
-      message = `${relativePath}: Unexpected error – ${details}`;
-      console.error(
-        `[mark-executable-on-save] Unexpected error for file ${filePath}:`,
-        error
-      );
-      break;
-    }
-  }
-
-  console.warn(`[mark-executable-on-save] ${message}`);
-  await showErrorMessage(message, config);
-}
-
-async function showErrorMessage(
-  message: string,
-  config: ExtensionConfig
-): Promise<void> {
-  if (config.silent || config.silentErrors) {
-    return;
-  }
-
-  await vscode.window.showErrorMessage(message);
-}
-
-//
-// Announcement
-//
-
-async function announceModeChange(
-  document: vscode.TextDocument,
-  oldMode: number,
-  newMode: number
-): Promise<void> {
-  const relativePath = formatRelativePath(document.uri);
-  const message =
-    `${relativePath}: Made executable (` +
-    `${formatMode(oldMode)} -> ${formatMode(newMode)})`;
-
-  await vscode.window.showInformationMessage(message);
-}
-
-function formatRelativePath(uri: vscode.Uri): string {
-  const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
-  if (!workspaceFolder) {
-    return basename(uri.fsPath);
-  }
-
-  const relativePath = relative(workspaceFolder.uri.fsPath, uri.fsPath);
-  return relativePath || basename(uri.fsPath);
-}
-
-function formatMode(mode: number): string {
-  return mode.toString(8).padStart(3, "0");
-}
-
-export const __testing = {
-  showErrorMessage,
-} as const;

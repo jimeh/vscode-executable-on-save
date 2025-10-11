@@ -4,7 +4,8 @@ import { chmod, mkdtemp, rm, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import sinon from "sinon";
-import { __testing } from "../extension";
+import { showErrorMessage } from "../notifications";
+import { type Config } from "../config";
 
 const CONFIG_SECTION = "markExecutableOnSave";
 const CONFIG_ENABLE_KEY = "enabled";
@@ -364,12 +365,11 @@ suite("Mark executable on save", () => {
         .stub(vscode.window, "showErrorMessage")
         .resolves(undefined as unknown as vscode.MessageItem);
 
-      await __testing.showErrorMessage("failure", {
-        enabled: true,
-        strategy: "safe",
+      const config: Pick<Config, "silent" | "silentErrors"> = {
         silent: false,
         silentErrors: false,
-      });
+      };
+      await showErrorMessage("failure", config);
 
       sinon.assert.calledOnce(showErrorStub);
       sinon.assert.calledWith(showErrorStub, "failure");
@@ -380,12 +380,11 @@ suite("Mark executable on save", () => {
         .stub(vscode.window, "showErrorMessage")
         .resolves(undefined as unknown as vscode.MessageItem);
 
-      await __testing.showErrorMessage("failure", {
-        enabled: true,
-        strategy: "safe",
+      const config: Pick<Config, "silent" | "silentErrors"> = {
         silent: false,
         silentErrors: true,
-      });
+      };
+      await showErrorMessage("failure", config);
 
       sinon.assert.notCalled(showErrorStub);
     });
