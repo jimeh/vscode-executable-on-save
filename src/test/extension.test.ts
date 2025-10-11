@@ -454,4 +454,214 @@ suite("Mark executable on save", () => {
 
     await rm(tempDir, { force: true, recursive: true });
   });
+
+  suite("shebang edge cases", () => {
+    test("ignores file with only # (not #!)", async () => {
+      configEnabled = true;
+      permissionStrategy = "safe";
+
+      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
+      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+
+      await writeFile(fileUri.fsPath, "#\necho hello", { mode: 0o644 });
+
+      const document = await vscode.workspace.openTextDocument(fileUri);
+      const editor = await vscode.window.showTextDocument(document, {
+        preview: false,
+      });
+      await editor.edit((editBuilder) => {
+        editBuilder.insert(
+          new vscode.Position(editor.document.lineCount, 0),
+          "# test\n"
+        );
+      });
+
+      await editor.document.save();
+      await delay(200);
+
+      const finalStat = await stat(fileUri.fsPath);
+      const finalExecutable = (finalStat.mode & 0o111) !== 0;
+      assert.strictEqual(
+        finalExecutable,
+        false,
+        "File should not be executable"
+      );
+
+      await vscode.commands.executeCommand(
+        "workbench.action.closeActiveEditor"
+      );
+      await rm(tempDir, { force: true, recursive: true });
+    });
+
+    test("ignores file with whitespace before shebang", async () => {
+      configEnabled = true;
+      permissionStrategy = "safe";
+
+      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
+      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+
+      await writeFile(fileUri.fsPath, " #!/bin/bash\necho hello", {
+        mode: 0o644,
+      });
+
+      const document = await vscode.workspace.openTextDocument(fileUri);
+      const editor = await vscode.window.showTextDocument(document, {
+        preview: false,
+      });
+      await editor.edit((editBuilder) => {
+        editBuilder.insert(
+          new vscode.Position(editor.document.lineCount, 0),
+          "# test\n"
+        );
+      });
+
+      await editor.document.save();
+      await delay(200);
+
+      const finalStat = await stat(fileUri.fsPath);
+      const finalExecutable = (finalStat.mode & 0o111) !== 0;
+      assert.strictEqual(
+        finalExecutable,
+        false,
+        "File should not be executable"
+      );
+
+      await vscode.commands.executeCommand(
+        "workbench.action.closeActiveEditor"
+      );
+      await rm(tempDir, { force: true, recursive: true });
+    });
+
+    test("handles file with only one character", async () => {
+      configEnabled = true;
+      permissionStrategy = "safe";
+
+      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
+      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+
+      await writeFile(fileUri.fsPath, "#", { mode: 0o644 });
+
+      const document = await vscode.workspace.openTextDocument(fileUri);
+      const editor = await vscode.window.showTextDocument(document, {
+        preview: false,
+      });
+      await editor.edit((editBuilder) => {
+        editBuilder.insert(
+          new vscode.Position(editor.document.lineCount, 0),
+          "# test\n"
+        );
+      });
+
+      await editor.document.save();
+      await delay(200);
+
+      const finalStat = await stat(fileUri.fsPath);
+      const finalExecutable = (finalStat.mode & 0o111) !== 0;
+      assert.strictEqual(
+        finalExecutable,
+        false,
+        "File should not be executable"
+      );
+
+      await vscode.commands.executeCommand(
+        "workbench.action.closeActiveEditor"
+      );
+      await rm(tempDir, { force: true, recursive: true });
+    });
+  });
+
+  suite("safe strategy with no read permissions", () => {
+    test("does not make executable when file has no read permissions", async () => {
+      configEnabled = true;
+      permissionStrategy = "safe";
+
+      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
+      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+
+      // Create file with normal permissions first so VS Code can open it
+      await writeFile(fileUri.fsPath, '#!/bin/bash\necho "hello"\n', {
+        mode: 0o644,
+      });
+
+      const document = await vscode.workspace.openTextDocument(fileUri);
+      const editor = await vscode.window.showTextDocument(document, {
+        preview: false,
+      });
+
+      // Now change to write-only permission before saving
+      await chmod(fileUri.fsPath, 0o200);
+
+      await editor.edit((editBuilder) => {
+        editBuilder.insert(
+          new vscode.Position(editor.document.lineCount, 0),
+          "# test\n"
+        );
+      });
+
+      await editor.document.save();
+      await delay(200);
+
+      const finalStat = await stat(fileUri.fsPath);
+      const finalMode = finalStat.mode & 0o777;
+      assert.strictEqual(
+        finalMode,
+        0o200,
+        "File mode should remain 0o200 (no execute added)"
+      );
+
+      await vscode.commands.executeCommand(
+        "workbench.action.closeActiveEditor"
+      );
+      await rm(tempDir, { force: true, recursive: true });
+    });
+  });
+
+  suite("manual command", () => {
+    test("makes file executable when command is run", async () => {
+      configEnabled = true;
+      permissionStrategy = "safe";
+
+      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
+      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+
+      await writeFile(fileUri.fsPath, '#!/bin/bash\necho "hello"\n', {
+        mode: 0o644,
+      });
+
+      const document = await vscode.workspace.openTextDocument(fileUri);
+      await vscode.window.showTextDocument(document, { preview: false });
+
+      // Run the command
+      await vscode.commands.executeCommand(
+        "mark-executable-on-save.markExecutableIfScript"
+      );
+
+      // Wait for permission change
+      await waitFor(
+        async () => ((await stat(fileUri.fsPath)).mode & 0o111) !== 0
+      );
+
+      const finalStat = await stat(fileUri.fsPath);
+      const finalMode = finalStat.mode & 0o777;
+      assert.strictEqual(finalMode, 0o755, "File should be executable");
+
+      await vscode.commands.executeCommand(
+        "workbench.action.closeActiveEditor"
+      );
+      await rm(tempDir, { force: true, recursive: true });
+    });
+
+    test("command does nothing when no editor is active", async () => {
+      // Close all editors
+      await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+
+      // Command should not throw
+      await vscode.commands.executeCommand(
+        "mark-executable-on-save.markExecutableIfScript"
+      );
+
+      // If we get here, the test passed
+      assert.ok(true, "Command handled gracefully with no active editor");
+    });
+  });
 });
