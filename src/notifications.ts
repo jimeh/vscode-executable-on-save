@@ -79,14 +79,14 @@ export async function reportError(
       const details = error instanceof Error ? error.message : String(error);
       message = `${relativePath}: Unexpected error – ${details}`;
       console.error(
-        `[mark-executable-on-save] Unexpected error for file ${filePath}:`,
+        `[executable-on-save] Unexpected error for file ${filePath}:`,
         error
       );
       break;
     }
   }
 
-  console.warn(`[mark-executable-on-save] ${message}`);
+  console.warn(`[executable-on-save] ${message}`);
   await showErrorMessage(message, config);
 }
 

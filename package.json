@@ -1,22 +1,23 @@
 {
-  "name": "mark-executable-on-save",
+  "name": "executable-on-save",
   "publisher": "jimeh",
-  "displayName": "Mark Executable on Save",
-  "description": "Mark files as executable (chmod +x) on save if they starts with \"#!\"",
+  "displayName": "Executable on Save",
+  "description": "Make files executable (chmod +x) on save if they starts with \"#!\"",
   "version": "0.0.1",
   "license": "MIT",
   "author": {
     "name": "Jim Myhrberg"
   },
-  "homepage": "https://github.com/jimeh/vscode-mark-executable-on-save",
+  "homepage": "https://github.com/jimeh/vscode-executable-on-save",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jimeh/vscode-mark-executable-on-save"
+    "url": "https://github.com/jimeh/vscode-executable-on-save"
   },
   "bugs": {
-    "url": "https://github.com/jimeh/vscode-mark-executable-on-save/issues"
+    "url": "https://github.com/jimeh/vscode-executable-on-save/issues"
   },
-  "icon": "img/mark-executable-on-save.png",
+  "qna": false,
+  "icon": "img/executable-on-save.png",
   "engines": {
     "vscode": "^1.95.0"
   },
@@ -30,20 +31,20 @@
   "contributes": {
     "commands": [
       {
-        "command": "mark-executable-on-save.markExecutableIfScript",
-        "title": "Mark Executable If Script",
+        "command": "executable-on-save.makeExecutableIfScript",
+        "title": "Make Executable If Script",
         "enablement": "editorIsOpen"
       }
     ],
     "configuration": {
-      "title": "Mark Executable on Save",
+      "title": "Executable on Save",
       "properties": {
-        "markExecutableOnSave.enabled": {
+        "executableOnSave.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Mark files beginning with #! as executable on save."
+          "description": "Mark files beginning with \"#!\" as executable on save."
         },
-        "markExecutableOnSave.permissionStrategy": {
+        "executableOnSave.permissionStrategy": {
           "type": "string",
           "enum": [
             "standard",
@@ -52,12 +53,12 @@
           "default": "safe",
           "description": "Permission strategy: 'standard' adds execute for all (user, group, other), 'safe' only adds execute where read permission exists."
         },
-        "markExecutableOnSave.silent": {
+        "executableOnSave.silent": {
           "type": "boolean",
           "default": false,
           "description": "Suppress information notifications when permissions change."
         },
-        "markExecutableOnSave.silentErrors": {
+        "executableOnSave.silentErrors": {
           "type": "boolean",
           "default": false,
           "description": "Suppress error notifications when permission updates fail."

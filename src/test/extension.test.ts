@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import sinon from "sinon";
 
-const CONFIG_SECTION = "markExecutableOnSave";
+const CONFIG_SECTION = "executableOnSave";
 const CONFIG_ENABLE_KEY = "enabled";
 const CONFIG_PERMISSION_STRATEGY_KEY = "permissionStrategy";
 const CONFIG_SILENT_KEY = "silent";
@@ -44,7 +44,7 @@ interface TestCase {
   expectedNotificationMessage?: string;
 }
 
-suite("Mark executable on save", () => {
+suite("Executable on save", () => {
   if (process.platform === "win32") {
     return;
   }
@@ -600,7 +600,7 @@ suite("Mark executable on save", () => {
 
       // Run the command
       await vscode.commands.executeCommand(
-        "mark-executable-on-save.markExecutableIfScript"
+        "executable-on-save.makeExecutableIfScript"
       );
 
       // Wait for permission change
@@ -624,7 +624,7 @@ suite("Mark executable on save", () => {
 
       // Command should not throw
       await vscode.commands.executeCommand(
-        "mark-executable-on-save.markExecutableIfScript"
+        "executable-on-save.makeExecutableIfScript"
       );
 
       // If we get here, the test passed

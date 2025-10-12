@@ -20,7 +20,7 @@ export interface Config {
  */
 export function readConfiguration(document: vscode.TextDocument): Config {
   const config = vscode.workspace.getConfiguration(
-    "markExecutableOnSave",
+    "executableOnSave",
     document.uri
   );
 

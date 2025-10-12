@@ -9,7 +9,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const onSaveHook = vscode.workspace.onDidSaveTextDocument(processDocument);
 
   const command = vscode.commands.registerCommand(
-    "mark-executable-on-save.markExecutableIfScript",
+    "executable-on-save.makeExecutableIfScript",
     async () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
