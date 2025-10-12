@@ -14,6 +14,7 @@ AGENTS.md
 CLAUDE.md
 esbuild.js
 img/*.svg
+img/logo.png
 mise.lock
 mise.toml
 node_modules/**

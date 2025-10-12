@@ -1,10 +1,10 @@
 <div align="center">
 
-<img width="196px" src="https://github.com/jimeh/vscode-executable-on-save/raw/refs/heads/main/img/logo.svg" alt="Logo">
+<img width="196px" src="https://github.com/jimeh/vscode-executable-on-save/raw/refs/heads/main/img/logo.png" alt="Logo">
 
 # Executable on Save
 
-**Making scripts executable should not require a terminal.**
+**VSCode extension to automatically mark script files as executable on save.**
 
 [![Latest Release](https://img.shields.io/github/release/jimeh/vscode-executable-on-save.svg)](https://github.com/jimeh/vscode-executable-on-save/releases)
 [![GitHub Issues](https://img.shields.io/github/issues/jimeh/vscode-executable-on-save.svg)](https://github.com/jimeh/vscode-executable-on-save/issues)
@@ -12,8 +12,6 @@
 [![License](https://img.shields.io/github/license/jimeh/vscode-executable-on-save.svg)](https://github.com/jimeh/vscode-executable-on-save/blob/main/LICENSE)
 
 </div>
-
-VSCode extension that automatically marks script files as executable on save.
 
 ## What It Does
 
