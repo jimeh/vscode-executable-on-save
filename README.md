@@ -35,6 +35,13 @@ The extension watches for file saves. When a file is saved:
 2. Checks if the file is already executable
 3. If not executable, applies the appropriate permissions
 
+### Behavior Notes
+
+- Only processes files with `file://` URIs (ignores untitled documents)
+- Shows a small notice when file permissions are modified
+- Skips files that are already executable
+- Runs after every save, minimal performance impact
+
 ## Configuration
 
 ### Enable/Disable
@@ -102,9 +109,7 @@ Set to `true` to suppress notifications altogether.
 
 ## Manual Command
 
-Mark the current file as executable via Command Palette:
-
-### Make Executable If Script
+### "Make Executable If Script"
 
 Checks for shebang and applies permissions manually, respecting the configured
 strategy.
@@ -115,13 +120,6 @@ strategy.
 - **Linux**: Full support
 - **BSD**: Full support
 - **Windows**: Disabled (Windows uses different permission model)
-
-## Behavior Notes
-
-- Only processes files with `file://` URIs (ignores untitled documents)
-- Shows a small notice when file permissions are modified
-- Skips files that are already executable
-- Runs after every save, minimal performance impact
 
 ## License
 
