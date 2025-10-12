@@ -73,6 +73,24 @@ suite("permissions", () => {
         expectedMode: 0o005,
       },
       {
+        name: "safe: 0o044 -> 0o055 (group read only)",
+        inputMode: 0o044,
+        strategy: "safe",
+        expectedMode: 0o055,
+      },
+      {
+        name: "safe: 0o777 -> 0o777 (maximum permissions, already executable)",
+        inputMode: 0o777,
+        strategy: "safe",
+        expectedMode: 0o777,
+      },
+      {
+        name: "safe: 0o646 -> 0o757 (user+group rw, other r)",
+        inputMode: 0o646,
+        strategy: "safe",
+        expectedMode: 0o757,
+      },
+      {
         name: "safe: 0o420 -> 0o520 (user read, group write-only)",
         inputMode: 0o420,
         strategy: "safe",
