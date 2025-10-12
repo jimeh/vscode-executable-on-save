@@ -30,9 +30,39 @@
       "description": "Requires a file system to perform file permissions changes."
     }
   },
-  "engines": {
-    "vscode": "^1.95.0"
+  "galleryBanner": {
+    "color": "#1E1E24",
+    "theme": "dark"
   },
+  "keywords": [
+    "auto-chmod",
+    "auto-execute",
+    "automation",
+    "bash",
+    "chmod",
+    "chmod +x",
+    "executable",
+    "execute-bit",
+    "file-mode",
+    "file-permissions",
+    "hashbang",
+    "linux",
+    "macos",
+    "node",
+    "on-save",
+    "permissions",
+    "posix",
+    "save-hook",
+    "script",
+    "scripts",
+    "sh",
+    "shebang",
+    "shell script",
+    "shell",
+    "unix",
+    "unix-permissions",
+    "zsh"
+  ],
   "categories": [
     "Other"
   ],
@@ -40,6 +70,9 @@
     "onStartupFinished"
   ],
   "main": "./dist/extension.js",
+  "engines": {
+    "vscode": "^1.95.0"
+  },
   "contributes": {
     "commands": [
       {
