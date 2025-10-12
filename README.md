@@ -1,25 +1,25 @@
 <div align="center">
 
-# Mark Executable on Save
+# Executable on Save
 
-_Marking scripts executable should not require a terminal._
+**Making scripts executable should not require a terminal.**
 
 </div>
 
-Automatically marks files with shebangs as executable when saved in VS Code.
+VSCode extension that automatically marks files as executable.
 
 ## What It Does
 
 When you save a file that starts with `#!` (a shebang), this extension
-automatically runs `chmod +x` on it. No more manually making your shell scripts,
-Python scripts, or other executable files runnable.
+automatically makes it executable (similar to `chmod +x`). No more manually
+making your shell scripts, Python scripts, or other executable files runnable.
 
 ## Installation
 
 Install from the VS Code marketplace or via the command line:
 
 ```bash
-code --install-extension mark-executable-on-save
+code --install-extension jimeh.executable-on-save
 ```
 
 ## How It Works
@@ -29,23 +29,6 @@ The extension watches for file saves. When a file is saved:
 1. Checks if the first two characters are `#!`
 2. Checks if the file is already executable
 3. If not executable, applies the appropriate permissions
-
-Works with any scripting language:
-
-```bash
-#!/bin/bash
-echo "Automatically executable!"
-```
-
-```python
-#!/usr/bin/env python3
-print("Automatically executable!")
-```
-
-```ruby
-#!/usr/bin/env ruby
-puts "Automatically executable!"
-```
 
 ## Configuration
 
@@ -116,7 +99,7 @@ Set to `true` to suppress notifications altogether.
 
 Mark the current file as executable via Command Palette:
 
-### Mark Executable If Script
+### Make Executable If Script
 
 Checks for shebang and applies permissions manually, respecting the configured
 strategy.
@@ -131,41 +114,10 @@ strategy.
 ## Behavior Notes
 
 - Only processes files with `file://` URIs (ignores untitled documents)
-- Logs permission errors to Developer Console but doesn't show popups
+- Shows a small notice when file permissions are modified
 - Skips files that are already executable
 - Runs after every save, minimal performance impact
-
-## Troubleshooting
-
-### File not becoming executable
-
-1. Check Developer Console (`Help > Toggle Developer Tools`)
-2. Look for permission errors or configuration issues
-3. Verify the file starts with exactly `#!`
-4. Ensure the file is saved to disk (not an untitled document)
-
-### Permission denied errors
-
-The extension needs write access to modify file permissions.
-
-## Privacy
-
-This extension:
-
-- Only reads the first two characters of saved files
-- Only modifies file permissions, never file content
-- Does not send any data anywhere
-- Operates entirely locally
 
 ## License
 
 MIT
-
-## Changelog
-
-### 0.0.1 (Initial Release)
-
-- Automatic chmod +x on save for files with shebangs
-- Safe and standard permission strategies
-- Manual command support
-- Platform detection
