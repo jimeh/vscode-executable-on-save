@@ -27,6 +27,10 @@ async function handleDocument(
   document: vscode.TextDocument,
   config: Config
 ): Promise<void> {
+  if (!config.enabled) {
+    return;
+  }
+
   if (shouldSkipDocument(document)) {
     return;
   }
@@ -40,10 +44,6 @@ async function handleDocument(
 
   const shebang = readShebang(document);
   if (!startsWithShebang(shebang)) {
-    return;
-  }
-
-  if (!config.enabled) {
     return;
   }
 
