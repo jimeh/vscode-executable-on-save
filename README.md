@@ -1,6 +1,6 @@
 <div align="center">
 
-<img width="196px" src="https://raw.githubusercontent.com/jimeh/vscode-executable-on-save/main/img/executable-on-save.svg" alt="Logo">
+<img width="196px" src="https://github.com/jimeh/vscode-executable-on-save/raw/refs/heads/main/img/logo.svg" alt="Logo">
 
 # Executable on Save
 

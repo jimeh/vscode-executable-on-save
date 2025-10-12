@@ -17,7 +17,7 @@
     "url": "https://github.com/jimeh/vscode-executable-on-save/issues"
   },
   "qna": false,
-  "icon": "img/executable-on-save.png",
+  "icon": "img/icon.png",
   "extensionKind": [
     "workspace"
   ],
