@@ -18,6 +18,18 @@
   },
   "qna": false,
   "icon": "img/executable-on-save.png",
+  "extensionKind": [
+    "workspace"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "Requires a file system to perform file permissions changes."
+    }
+  },
   "engines": {
     "vscode": "^1.95.0"
   },
