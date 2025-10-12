@@ -72,6 +72,18 @@ suite("permissions", () => {
         strategy: "safe",
         expectedMode: 0o005,
       },
+      {
+        name: "safe: 0o420 -> 0o520 (user read, group write-only)",
+        inputMode: 0o420,
+        strategy: "safe",
+        expectedMode: 0o520,
+      },
+      {
+        name: "safe: 0o204 -> 0o205 (user write-only, other read)",
+        inputMode: 0o204,
+        strategy: "safe",
+        expectedMode: 0o205,
+      },
       // Safe strategy - no read permissions (should return null)
       {
         name: "safe: 0o200 -> null (no read bits)",
@@ -128,6 +140,18 @@ suite("permissions", () => {
         strategy: "safe",
         expectedMode: 0o500,
       },
+      {
+        name: "safe: 0o654 -> 0o755 (has user exec, adds group+other)",
+        inputMode: 0o654,
+        strategy: "safe",
+        expectedMode: 0o755,
+      },
+      {
+        name: "safe: 0o641 -> 0o751 (has other exec, preserves it)",
+        inputMode: 0o641,
+        strategy: "safe",
+        expectedMode: 0o751,
+      },
       // Safe strategy - special bits (setuid/setgid/sticky)
       {
         name: "safe: 0o4644 -> 0o4755 (preserves setuid)",
@@ -152,6 +176,12 @@ suite("permissions", () => {
         inputMode: 0o6644,
         strategy: "safe",
         expectedMode: 0o6755,
+      },
+      {
+        name: "safe: 0o7644 -> 0o7755 (preserves all special bits)",
+        inputMode: 0o7644,
+        strategy: "safe",
+        expectedMode: 0o7755,
       },
       // Standard strategy - always adds 0o111
       {
@@ -208,6 +238,18 @@ suite("permissions", () => {
         inputMode: 0o1644,
         strategy: "standard",
         expectedMode: 0o1755,
+      },
+      {
+        name: "standard: 0o6644 -> 0o6755 (preserves setuid+setgid)",
+        inputMode: 0o6644,
+        strategy: "standard",
+        expectedMode: 0o6755,
+      },
+      {
+        name: "standard: 0o7644 -> 0o7755 (preserves all special bits)",
+        inputMode: 0o7644,
+        strategy: "standard",
+        expectedMode: 0o7755,
       },
     ];
 

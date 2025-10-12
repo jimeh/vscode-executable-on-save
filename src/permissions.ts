@@ -23,7 +23,7 @@ export function calculateNewMode(
 ): number | null {
   if (strategy === "safe") {
     const readBits = mode & 0o444;
-    const executeBits = ((readBits >> 2) | (readBits >> 1) | readBits) & 0o111;
+    const executeBits = (readBits >> 2) & 0o111;
     if (executeBits === 0) {
       return null;
     }
