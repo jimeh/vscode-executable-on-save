@@ -159,7 +159,7 @@ This extension:
 
 ## License
 
-[Insert license here]
+MIT
 
 ## Changelog
 
