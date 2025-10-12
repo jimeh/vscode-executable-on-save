@@ -176,6 +176,15 @@ suite("Executable on save", () => {
       expectedExecutable: true,
       shouldChangeMode: true,
     },
+    {
+      name: "handles BOM before shebang",
+      content: "\uFEFF#!/usr/bin/env bash\necho hello\n",
+      initialMode: 0o644,
+      configEnabled: true,
+      permissionStrategy: "safe",
+      expectedExecutable: true,
+      shouldChangeMode: true,
+    },
     // Safe permission strategy test cases
     {
       name: "safe strategy: 0o644 -> 0o755 (read+write becomes read+write+execute)",

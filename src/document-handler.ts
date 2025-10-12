@@ -90,8 +90,8 @@ function readShebang(document: vscode.TextDocument): string {
 }
 
 /**
- * Checks if a string is exactly "#!".
+ * Checks if a string starts with "#!".
  */
-function startsWithShebang(prefix: string): boolean {
-  return prefix.length === 2 && prefix === "#!";
+function startsWithShebang(str: string): boolean {
+  return str.startsWith("#!");
 }
