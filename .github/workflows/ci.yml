@@ -34,7 +34,6 @@ jobs:
 
   release-please:
     runs-on: ubuntu-latest
-    needs: [lint, test]
     if: startsWith(github.ref, 'refs/heads/')
     steps:
       - uses: jimeh/release-please-manifest-action@bfd8923580a274363ff9fbaf6d07484fbc8d9c6e # v2.0.0
