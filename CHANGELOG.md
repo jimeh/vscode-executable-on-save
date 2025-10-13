@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/jimeh/vscode-executable-on-save/compare/v0.1.0...v0.1.1) (2025-10-13)
+
+
+### Bug Fixes
+
+* **release:** resolve automated build and publish issue ([#15](https://github.com/jimeh/vscode-executable-on-save/issues/15)) ([cb96552](https://github.com/jimeh/vscode-executable-on-save/commit/cb96552d825841d1d677d710745b2b6f5776a572))
+
 ## 0.1.0 (2025-10-13)
 
 
