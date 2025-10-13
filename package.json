@@ -35,8 +35,6 @@
     "theme": "dark"
   },
   "keywords": [
-    "auto-chmod",
-    "auto-execute",
     "automation",
     "bash",
     "chmod",
@@ -44,11 +42,9 @@
     "executable",
     "execute-bit",
     "file-mode",
-    "file-permissions",
     "hashbang",
     "linux",
     "macos",
-    "node",
     "on-save",
     "permissions",
     "posix",
@@ -57,10 +53,8 @@
     "scripts",
     "sh",
     "shebang",
-    "shell script",
     "shell",
     "unix",
-    "unix-permissions",
     "zsh"
   ],
   "categories": [
