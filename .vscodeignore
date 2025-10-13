@@ -4,6 +4,7 @@
 **/eslint.config.mjs
 **/tsconfig.json
 .cursor/**
+.env*
 .github/**
 .gitignore
 .prettierignore
