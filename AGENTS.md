@@ -75,6 +75,34 @@ npm run lint:fix
 npm test
 ```
 
+## Releases
+
+Releases are fully automated via
+[release-please](https://github.com/googleapis/release-please):
+
+- **Version bumping**: Automatic based on
+  [Conventional Commits](https://www.conventionalcommits.org/) (feat: →
+  minor, fix: → patch, BREAKING CHANGE: → major)
+- **Changelog generation**: Auto-generated from commit messages and
+  linked to PRs/commits
+- **Publishing**: Automatic on tag creation to VSCode Marketplace,
+  OpenVSX, and GitHub Releases
+
+### How It Works
+
+1. Push commits with conventional commit messages (e.g.,
+   `feat: add new feature`, `fix: resolve bug`)
+2. release-please creates/updates a release PR with version bump and
+   changelog
+3. Merge the release PR → creates a tag → triggers automatic
+   publishing
+
+**Never manually**:
+
+- Bump version in `package.json`
+- Edit `CHANGELOG.md`
+- Create version tags
+
 ## Configuration Keys
 
 Four settings in [package.json](package.json) under `executableOnSave.*`:
