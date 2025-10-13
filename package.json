@@ -2,7 +2,7 @@
   "name": "executable-on-save",
   "publisher": "jimeh",
   "displayName": "Executable on Save",
-  "description": "Make files executable (chmod +x) on save if they starts with \"#!\"",
+  "description": "Make files executable (chmod +x) on save if they start with \"#!\"",
   "version": "0.0.1",
   "license": "MIT",
   "author": {

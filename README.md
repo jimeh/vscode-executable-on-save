@@ -4,7 +4,7 @@
 
 # Executable on Save
 
-**VSCode extension that automatically marks script files as executable on save.**
+**VSCode extension that automatically makes script files executable on save.**
 
 [![Latest Release](https://img.shields.io/github/release/jimeh/vscode-executable-on-save.svg)](https://github.com/jimeh/vscode-executable-on-save/releases)
 [![GitHub Issues](https://img.shields.io/github/issues/jimeh/vscode-executable-on-save.svg)](https://github.com/jimeh/vscode-executable-on-save/issues)
