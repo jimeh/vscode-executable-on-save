@@ -27,10 +27,12 @@ jobs:
         with:
           node-version-file: "package.json"
       - run: npm install
-      - run: xvfb-run -a npm test
-        if: runner.os == 'Linux'
-      - run: npm test
-        if: runner.os != 'Linux'
+      - if: runner.os == 'Linux'
+        run: xvfb-run -a npm test
+      - if: runner.os != 'Linux'
+        run: npm test
+        env:
+          TMPDIR: ${{ runner.temp }}
 
   release-please:
     runs-on: ubuntu-latest
