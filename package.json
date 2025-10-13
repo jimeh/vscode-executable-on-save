@@ -149,5 +149,8 @@
     "prettier": "^3.6.2",
     "sinon": "^21.0.0",
     "typescript": "^5.9.2"
+  },
+  "overrides": {
+    "punycode": "npm:punycode.js@^2.3.1"
   }
 }
