@@ -10,9 +10,9 @@ repository.
 ## Overview
 
 VS Code extension that automatically marks files with shebangs (`#!`) as
-executable on save. Supports two permission strategies: "safe" (adds execute
-only where read permission exists) and "standard" (adds execute for
-user/group/other unconditionally).
+executable on save. Supports three permission strategies: "umask" (default,
+respects system umask), "read-based" (adds execute only where read permission
+exists), and "all" (adds execute for user/group/other unconditionally).
 
 ## Prerequisites
 
@@ -42,19 +42,24 @@ npm run package          # Minified production build
    manual command
 2. [src/document-handler.ts](src/document-handler.ts) - Main processing logic:
    checks platform, config, shebang, applies chmod
-3. [src/permissions.ts](src/permissions.ts) - Permission calculations with two
-   strategies
+3. [src/permissions.ts](src/permissions.ts) - Permission calculations with
+   three strategies
 4. [src/config.ts](src/config.ts) - Configuration management
 5. [src/notifications.ts](src/notifications.ts) - User feedback
 
 ### Permission Strategies
 
-**safe strategy** (default): Only adds execute where read exists by shifting
-read bits right 2 positions (e.g., `0o644` → `0o755`, `0o600` → `0o700`).
+**umask strategy** (default): Respects system umask when adding execute bits.
+Calculates allowed execute bits as `(0o777 & ~umask) & 0o111`. Most
+Unix-correct approach. With umask `0o022`, adds `0o111` (all execute). With
+umask `0o077`, adds only `0o100` (user execute).
 
-**standard strategy**: Always adds `0o111` (execute for all) via bitwise OR.
+**read-based strategy**: Only adds execute where read exists by shifting read bits
+right 2 positions (e.g., `0o644` → `0o755`, `0o600` → `0o700`).
 
-Both preserve special bits (setuid, setgid, sticky).
+**all strategy**: Always adds `0o111` (execute for all) via bitwise OR.
+
+All strategies preserve special bits (setuid, setgid, sticky).
 
 ### Build System
 
@@ -108,7 +113,7 @@ Releases are fully automated via
 Four settings in [package.json](package.json) under `executableOnSave.*`:
 
 - `enabled` (boolean, default: true)
-- `permissionStrategy` (enum: "safe"|"standard", default: "safe")
+- `permissionStrategy` (enum: "umask"|"read-based"|"all", default: "umask")
 - `silent` (boolean, default: false) - suppresses info notifications
 - `silentErrors` (boolean, default: false) - suppresses error notifications
 
@@ -126,7 +131,7 @@ Four settings in [package.json](package.json) under `executableOnSave.*`:
 1. **Shebang detection**: Reads first 2 characters using `vscode.Range`
    validation
 2. **Executable check**: Uses `fs.stat()` and bitwise `mode & 0o111`
-3. **Safe strategy logic**: Shifts read bits right to derive execute bits,
+3. **Read-based strategy logic**: Shifts read bits right to derive execute bits,
    ensuring symmetry with read permissions
 4. **Skip conditions**: Windows platform, untitled documents, non-file URIs
 5. **Error handling**: Logs all errors; shows notifications for

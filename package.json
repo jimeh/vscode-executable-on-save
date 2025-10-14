@@ -88,11 +88,22 @@
         "executableOnSave.permissionStrategy": {
           "type": "string",
           "enum": [
-            "standard",
-            "safe"
+            "umask",
+            "read-based",
+            "all"
           ],
-          "default": "safe",
-          "description": "Permission strategy: 'standard' adds execute for all (user, group, other), 'safe' only adds execute where read permission exists."
+          "enumItemLabels": [
+            "Umask (respects system umask)",
+            "Read-based (execute where read exists)",
+            "All (execute for everyone)"
+          ],
+          "markdownEnumDescriptions": [
+            "Respects system umask when adding execute bits (default, recommended)",
+            "Only adds execute bits where corresponding read bits exist",
+            "Always adds execute bits for user, group, and other"
+          ],
+          "default": "umask",
+          "markdownDescription": "Permission strategy for setting execute bits on files with shebangs."
         },
         "executableOnSave.silent": {
           "type": "boolean",

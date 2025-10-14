@@ -68,14 +68,39 @@ Choose how the execute permissions are added:
 
 ```json
 {
-  "markExecutableOnSave.permissionStrategy": "safe"
+  "markExecutableOnSave.permissionStrategy": "umask"
 }
 ```
 
 Options:
 
-- `"safe"` (default): Adds execute only where read permission exists
-- `"standard"`: Adds execute for user, group, and other unconditionally
+- `"umask"` (default): Respects system umask when adding execute
+- `"read-based"`: Adds execute only where read permission exists
+- `"all"`: Adds execute for user, group, and other unconditionally
+
+#### Umask Strategy (Recommended)
+
+Respects your system's umask setting, following Unix conventions. Only adds
+execute permissions that would be allowed on newly created files.
+
+**With umask 0o022 (typical):**
+
+| Before      | After       | Description     |
+| ----------- | ----------- | --------------- |
+| `rw-r--r--` | `rwxr-xr-x` | All get execute |
+| `rw-------` | `rwx--x--x` | All get execute |
+| `rw-rw-r--` | `rwxrwxr-x` | All get execute |
+
+**With umask 0o077 (restrictive):**
+
+| Before      | After       | Description            |
+| ----------- | ----------- | ---------------------- |
+| `rw-r--r--` | `rwxr--r--` | Only user gets execute |
+| `rw-------` | `rwx------` | Only user gets execute |
+| `rw-rw-r--` | `rwxrw-r--` | Only user gets execute |
+
+Technical: Calculates default file permissions (`0o777 & ~umask`), extracts
+execute bits, and applies them via bitwise OR.
 
 #### Safe Strategy
 
