@@ -26,7 +26,7 @@ export function readConfiguration(document: vscode.TextDocument): Config {
 
   return {
     enabled: config.get<boolean>("enabled", true),
-    strategy: config.get<Strategy>("permissionStrategy", "safe"),
+    strategy: config.get<Strategy>("permissionStrategy", "umask"),
     silent: config.get<boolean>("silent", false),
     silentErrors: config.get<boolean>("silentErrors", false),
   };
