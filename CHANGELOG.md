@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/jimeh/vscode-executable-on-save/compare/v0.2.0...v0.2.1) (2025-10-15)
+
+
+### Bug Fixes
+
+* **readme:** update permission strategy names ([f5e788e](https://github.com/jimeh/vscode-executable-on-save/commit/f5e788eba47192bca91e757559ee61a08d025fce))
+
 ## [0.2.0](https://github.com/jimeh/vscode-executable-on-save/compare/v0.1.1...v0.2.0) (2025-10-14)
 
 
