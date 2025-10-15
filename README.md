@@ -102,7 +102,7 @@ execute permissions that would be allowed on newly created files.
 Technical: Calculates default file permissions (`0o777 & ~umask`), extracts
 execute bits, and applies them via bitwise OR.
 
-#### Safe Strategy
+#### Read-based Strategy
 
 Maintains permission symmetry by only adding execute where read exists:
 
@@ -114,7 +114,7 @@ Maintains permission symmetry by only adding execute where read exists:
 
 Technical: shifts read bits right by 2 positions to derive execute bits.
 
-#### Standard Strategy
+#### All Strategy
 
 Always adds execute for all three permission groups:
 
