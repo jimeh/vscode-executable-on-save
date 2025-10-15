@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/jimeh/vscode-executable-on-save/compare/v0.2.1...v0.2.2) (2025-10-15)
+
+
+### Bug Fixes
+
+* **img:** minor adjustment to logo element positions ([#25](https://github.com/jimeh/vscode-executable-on-save/issues/25)) ([c2ea976](https://github.com/jimeh/vscode-executable-on-save/commit/c2ea9765ab99689303c0d6bc9e825f90674c1819))
+
 ## [0.2.1](https://github.com/jimeh/vscode-executable-on-save/compare/v0.2.0...v0.2.1) (2025-10-15)
 
 
