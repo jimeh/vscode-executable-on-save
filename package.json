@@ -3,7 +3,7 @@
   "publisher": "jimeh",
   "displayName": "Executable on Save",
   "description": "Make files executable (chmod +x) on save if they start with \"#!\"",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "license": "MIT",
   "author": {
     "name": "Jim Myhrberg"
