@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/jimeh/vscode-executable-on-save/compare/v0.2.2...v0.2.3) (2025-10-16)
+
+
+### Documentation
+
+* **readme:** optimize icon, logo and badge images ([#27](https://github.com/jimeh/vscode-executable-on-save/issues/27)) ([6c4b2cc](https://github.com/jimeh/vscode-executable-on-save/commit/6c4b2cce0c3fdc3e1db8280225ff2f47db33b04c))
+
 ## [0.2.2](https://github.com/jimeh/vscode-executable-on-save/compare/v0.2.1...v0.2.2) (2025-10-15)
 
 
