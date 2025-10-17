@@ -56,7 +56,7 @@ Control whether the extension runs when saving a file:
 
 ```json
 {
-  "markExecutableOnSave.enabled": true
+  "executableOnSave.enabled": true
 }
 ```
 
@@ -68,7 +68,7 @@ Choose how the execute permissions are added:
 
 ```json
 {
-  "markExecutableOnSave.permissionStrategy": "umask"
+  "executableOnSave.permissionStrategy": "umask"
 }
 ```
 
@@ -132,7 +132,7 @@ Disable information popups when permissions change:
 
 ```json
 {
-  "markExecutableOnSave.silent": false
+  "executableOnSave.silent": false
 }
 ```
 
