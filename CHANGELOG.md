@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.4](https://github.com/jimeh/vscode-executable-on-save/compare/v0.2.3...v0.2.4) (2025-10-17)
+
+
+### Bug Fixes
+
+* **command:** allow manual "Make Executable If Script" when on-save is disabled ([#32](https://github.com/jimeh/vscode-executable-on-save/issues/32)) ([9136de3](https://github.com/jimeh/vscode-executable-on-save/commit/9136de3b00bbcdbb8a108e3544aa194fd46202b7))
+
+
+### Documentation
+
+* **readme:** fix configuration keys in examples ([#30](https://github.com/jimeh/vscode-executable-on-save/issues/30)) ([0f4b866](https://github.com/jimeh/vscode-executable-on-save/commit/0f4b8660fc7f8c85ab20f31a99dcaa56cf02a940))
+
 ## [0.2.3](https://github.com/jimeh/vscode-executable-on-save/compare/v0.2.2...v0.2.3) (2025-10-16)
 
 
