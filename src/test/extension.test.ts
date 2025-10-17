@@ -431,11 +431,22 @@ suite("Executable on save", () => {
       const saved = await editor.document.save();
       assert.ok(saved, "Expected document.save() to succeed");
 
+      // Give the onDidSaveTextDocument handler time to be scheduled
+      await delay(50);
+
       if (testCase.shouldChangeMode) {
         // Wait for mode change if we expect it
         await waitFor(
           async () => ((await stat(fileUri.fsPath)).mode & 0o111) !== 0
         );
+
+        // Wait for notification if expected (notifications are async)
+        if (!(testCase.silent ?? false)) {
+          await waitFor(
+            async () => showInformationMessageStub.callCount > 0,
+            500
+          );
+        }
       } else {
         // Give some time for any potential change
         await delay(200);
