@@ -12,6 +12,21 @@ export interface Config {
 }
 
 /**
+ * Checks if the extension is enabled for on-save processing.
+ * Lightweight check that only reads the enabled setting.
+ *
+ * @param document - The document to check configuration for
+ * @returns True if the extension is enabled for on-save processing
+ */
+export function onSaveEnabled(document: vscode.TextDocument): boolean {
+  const config = vscode.workspace.getConfiguration(
+    "executableOnSave",
+    document.uri
+  );
+  return config.get<boolean>("enabled", true);
+}
+
+/**
  * Reads the extension configuration from the workspace.
  *
  * @param document - The document to get configuration for (supports

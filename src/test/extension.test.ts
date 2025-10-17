@@ -895,5 +895,42 @@ suite("Executable on save", () => {
       // If we get here, the test passed
       assert.ok(true, "Command handled gracefully with no active editor");
     });
+
+    test("works when feature is disabled but manually triggered", async () => {
+      configEnabled = false; // Feature disabled
+      permissionStrategy = "umask";
+
+      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
+      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+
+      await writeFile(fileUri.fsPath, '#!/bin/bash\necho "hello"\n', {
+        mode: 0o644,
+      });
+
+      const document = await vscode.workspace.openTextDocument(fileUri);
+      await vscode.window.showTextDocument(document, { preview: false });
+
+      // Run the command manually
+      await vscode.commands.executeCommand(
+        "executable-on-save.makeExecutableIfScript"
+      );
+
+      // Wait for permission change
+      await waitFor(
+        async () => ((await stat(fileUri.fsPath)).mode & 0o111) !== 0
+      );
+
+      const finalStat = await stat(fileUri.fsPath);
+      const finalMode = finalStat.mode & 0o777;
+      assert.ok(
+        (finalMode & 0o111) !== 0,
+        "File should be executable even with feature disabled"
+      );
+
+      await vscode.commands.executeCommand(
+        "workbench.action.closeActiveEditor"
+      );
+      await rm(tempDir, { force: true, recursive: true });
+    });
   });
 });

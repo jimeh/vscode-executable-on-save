@@ -24,6 +24,10 @@ When you save a file that starts with `#!` (a shebang), this extension
 automatically makes it executable (similar to `chmod +x`). No more manually
 making your shell scripts, Python scripts, or other executable files runnable.
 
+It is similar in behavior to Emacs'
+`executable-make-buffer-file-executable-if-script-p` when set up as an
+after-save hook.
+
 ## Installation
 
 Install from the [VSCode Marketplace][vscode-ext], [OpenVSX][openvsx-ext], or
@@ -39,14 +43,17 @@ The extension watches for file saves. When a file is saved:
 
 1. Checks if the first two characters are `#!`
 2. Checks if the file is already executable
-3. If not executable, applies the appropriate permissions
+3. If not executable and has a shebang, applies the appropriate permissions
 
 ### Behavior Notes
 
 - Only processes files with `file://` URIs (ignores untitled documents)
-- Shows a small notice when file permissions are modified
+- Ignores non-file URI schemes (e.g., `git:`)
 - Skips files that are already executable
-- Runs after every save, minimal performance impact
+- Requires the shebang at the very beginning of the file (no leading whitespace)
+- Only reads the first two characters out of documents for shebang detection
+- Shows a small notice when file permissions are modified, which can be silenced
+- Runs after every save with very minimal performance impact
 
 ## Configuration
 
@@ -118,11 +125,11 @@ Technical: shifts read bits right by 2 positions to derive execute bits.
 
 Always adds execute for all three permission groups:
 
-| Before      | After       | Description                |
-| ----------- | ----------- | -------------------------- |
-| `rw-r--r--` | `rwxr-xr-x` | Standard file permissions  |
-| `rw-------` | `rwx--x--x` | Others gain execute access |
-| `rw-r-----` | `rwxr-x--x` | Others gain execute access |
+| Before      | After       | Description                             |
+| ----------- | ----------- | --------------------------------------- |
+| `rw-r--r--` | `rwxr-xr-x` | Standard file permissions               |
+| `rw-------` | `rwx--x--x` | Adds execute for user, group, and other |
+| `rw-r-----` | `rwxr-x--x` | Adds execute for user, group, and other |
 
 Technical: performs bitwise OR with `0o111`.
 
@@ -138,12 +145,10 @@ Disable information popups when permissions change:
 
 Set to `true` to suppress notifications altogether.
 
-## Manual Command
+## Manual Execution
 
-### "Make Executable If Script"
-
-Checks for shebang and applies permissions manually, respecting the configured
-strategy.
+Run "Make Executable If Script" from the command palette to manually run checks
+and mark the current file as executable if needed.
 
 ## Platform Support
 
