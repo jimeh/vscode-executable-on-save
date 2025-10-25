@@ -14,11 +14,13 @@
 AGENTS.md
 CLAUDE.md
 esbuild.js
-img/*.svg
-img/logo.png
 mise.lock
 mise.toml
 node_modules/**
 out/**
 src/**
 vsc-extension-quickstart.md
+
+# Exclude everything in the img folder except the icon.png file.
+img/**/*
+!img/icon.png
