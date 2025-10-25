@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.5](https://github.com/jimeh/vscode-executable-on-save/compare/v0.2.4...v0.2.5) (2025-10-25)
+
+
+### Bug Fixes
+
+* **icon:** improve extension icon ([#37](https://github.com/jimeh/vscode-executable-on-save/issues/37)) ([5c0d770](https://github.com/jimeh/vscode-executable-on-save/commit/5c0d770f6a5b4ea55541324b5cf0eaf84fcb36d0))
+* **packaging:** don't include img/badge/* in built extension package ([#34](https://github.com/jimeh/vscode-executable-on-save/issues/34)) ([b2e238b](https://github.com/jimeh/vscode-executable-on-save/commit/b2e238bd0d0006738c6218ed9e01c92ac3d7edc2))
+
 ## [0.2.4](https://github.com/jimeh/vscode-executable-on-save/compare/v0.2.3...v0.2.4) (2025-10-17)
 
 
