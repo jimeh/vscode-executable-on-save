@@ -63,6 +63,14 @@
   "activationEvents": [
     "onStartupFinished"
   ],
+  "files": [
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md",
+    "dist/extension.js",
+    "img/icon.png",
+    "package.json"
+  ],
   "main": "./dist/extension.js",
   "packageManager": "pnpm@10.29.3",
   "engines": {
@@ -120,7 +128,8 @@
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",
-    "vscode:package": "npx -y vsce package",
+    "vscode:package": "npx -y @vscode/vsce package --no-dependencies --out $(node -p \"const p=require('./package.json');p.publisher+'.'+p.name+'-'+p.version+'.vsix'\")",
+    "vsce:ls": "pnpm run vscode:prepublish && npx -y @vscode/vsce ls --no-dependencies",
     "compile": "pnpm run check-types && pnpm run lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
     "watch:esbuild": "node esbuild.js --watch",
@@ -134,7 +143,8 @@
     "lint:eslint": "eslint src",
     "lint": "npm-run-all -s lint:prettier lint:eslint",
     "lint:fix": "eslint --fix src && prettier --write src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "verify:vsix-files": "tsx scripts/verify-vsix-files.ts"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -151,6 +161,7 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^3.6.2",
     "sinon": "^21.0.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.2"
   },
   "pnpm": {
