@@ -31,13 +31,13 @@ pnpm run lint             # Run prettier + eslint checks
 pnpm run lint:fix         # Format with prettier and auto-fix eslint
 pnpm test                 # Run all tests (includes compile + lint)
 pnpm run compile-tests    # Compile tests to out/ directory
-pnpm run package          # Minified production build
+pnpm run bundle           # Minified production build
 ```
 
 ## Packaging Commands
 
 ```sh
-pnpm run vscode:package   # Build VSIX with descriptive filename
+pnpm run package          # Build VSIX with descriptive filename
 pnpm run vsce:ls          # List files that will be in the VSIX
 pnpm run verify:vsix-files # Verify VSIX contains exactly expected files
 ```
