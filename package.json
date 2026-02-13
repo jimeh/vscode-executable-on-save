@@ -64,7 +64,7 @@
     "onStartupFinished"
   ],
   "main": "./dist/extension.js",
-  "packageManager": "npm@10.8.2",
+  "packageManager": "pnpm@10.29.3",
   "engines": {
     "node": "^20.0.0",
     "vscode": "^1.95.0"
@@ -119,16 +119,16 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run package",
+    "vscode:prepublish": "pnpm run package",
     "vscode:package": "npx -y vsce package",
-    "compile": "npm run check-types && npm run lint && node esbuild.js",
+    "compile": "pnpm run check-types && pnpm run lint && node esbuild.js",
     "watch": "npm-run-all -p watch:*",
     "watch:esbuild": "node esbuild.js --watch",
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
-    "package": "npm run check-types && npm run lint && node esbuild.js --production",
+    "package": "pnpm run check-types && pnpm run lint && node esbuild.js --production",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
     "check-types": "tsc --noEmit",
     "lint:prettier": "prettier --check src",
     "lint:eslint": "eslint src",
@@ -153,7 +153,12 @@
     "sinon": "^21.0.0",
     "typescript": "^5.9.2"
   },
-  "overrides": {
-    "punycode": "npm:punycode.js@^2.3.1"
+  "pnpm": {
+    "overrides": {
+      "punycode": "npm:punycode.js@^2.3.1"
+    },
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }
