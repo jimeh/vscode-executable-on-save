@@ -1,5 +1,5 @@
-import * as vscode from "vscode";
-import { type Strategy } from "./permissions";
+import * as vscode from 'vscode';
+import { type Strategy } from './permissions';
 
 /**
  * Extension configuration settings.
@@ -20,10 +20,10 @@ export interface Config {
  */
 export function onSaveEnabled(document: vscode.TextDocument): boolean {
   const config = vscode.workspace.getConfiguration(
-    "executableOnSave",
+    'executableOnSave',
     document.uri
   );
-  return config.get<boolean>("enabled", true);
+  return config.get<boolean>('enabled', true);
 }
 
 /**
@@ -35,14 +35,14 @@ export function onSaveEnabled(document: vscode.TextDocument): boolean {
  */
 export function readConfiguration(document: vscode.TextDocument): Config {
   const config = vscode.workspace.getConfiguration(
-    "executableOnSave",
+    'executableOnSave',
     document.uri
   );
 
   return {
-    enabled: config.get<boolean>("enabled", true),
-    strategy: config.get<Strategy>("permissionStrategy", "umask"),
-    silent: config.get<boolean>("silent", false),
-    silentErrors: config.get<boolean>("silentErrors", false),
+    enabled: config.get<boolean>('enabled', true),
+    strategy: config.get<Strategy>('permissionStrategy', 'umask'),
+    silent: config.get<boolean>('silent', false),
+    silentErrors: config.get<boolean>('silentErrors', false),
   };
 }

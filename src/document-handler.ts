@@ -1,8 +1,8 @@
-import * as vscode from "vscode";
-import { chmod, stat } from "node:fs/promises";
-import { calculateNewMode, isExecutable } from "./permissions";
-import { announceModeChange, reportError } from "./notifications";
-import { type Config, readConfiguration } from "./config";
+import * as vscode from 'vscode';
+import { chmod, stat } from 'node:fs/promises';
+import { calculateNewMode, isExecutable } from './permissions';
+import { announceModeChange, reportError } from './notifications';
+import { type Config, readConfiguration } from './config';
 
 /**
  * Processes a document on save or manual command invocation.
@@ -63,7 +63,7 @@ async function handleDocument(
  * @returns true if the document should be skipped
  */
 function shouldSkipDocument(document: vscode.TextDocument): boolean {
-  if (process.platform === "win32") {
+  if (process.platform === 'win32') {
     return true;
   }
 
@@ -71,7 +71,7 @@ function shouldSkipDocument(document: vscode.TextDocument): boolean {
     return true;
   }
 
-  return document.uri.scheme !== "file";
+  return document.uri.scheme !== 'file';
 }
 
 /**
@@ -89,5 +89,5 @@ function readShebang(document: vscode.TextDocument): string {
  * Checks if a string starts with "#!".
  */
 function startsWithShebang(str: string): boolean {
-  return str.startsWith("#!");
+  return str.startsWith('#!');
 }

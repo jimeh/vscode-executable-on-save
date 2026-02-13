@@ -1,17 +1,17 @@
-import * as vscode from "vscode";
-import { basename, relative } from "node:path";
-import { type Config } from "./config";
+import * as vscode from 'vscode';
+import { basename, relative } from 'node:path';
+import { type Config } from './config';
 
 /**
  * Configuration subset used for notifications.
  */
-type NotificationConfig = Pick<Config, "silent" | "silentErrors">;
+type NotificationConfig = Pick<Config, 'silent' | 'silentErrors'>;
 
 /**
  * Formats a file mode as an octal string (e.g., 755).
  */
 function formatMode(mode: number): string {
-  return mode.toString(8).padStart(3, "0");
+  return mode.toString(8).padStart(3, '0');
 }
 
 /**
@@ -62,16 +62,16 @@ export async function reportError(
   config: NotificationConfig
 ): Promise<void> {
   const uri = document?.uri;
-  const filePath = uri?.fsPath ?? "unknown";
+  const filePath = uri?.fsPath ?? 'unknown';
   const relativePath = uri ? formatRelativePath(uri) : filePath;
   let message = `${relativePath}: Unexpected error.`;
 
   switch (error?.code) {
-    case "EACCES":
+    case 'EACCES':
       message = `${relativePath}: Permission denied when updating permissions.`;
       break;
 
-    case "ENOENT":
+    case 'ENOENT':
       message = `${relativePath}: File no longer exists.`;
       break;
 
