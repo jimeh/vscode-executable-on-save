@@ -72,7 +72,6 @@
     "package.json"
   ],
   "main": "./dist/extension.js",
-  "packageManager": "pnpm@10.29.3",
   "engines": {
     "node": "^20.0.0",
     "vscode": "^1.95.0"
