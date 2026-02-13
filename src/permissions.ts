@@ -1,4 +1,4 @@
-export type Strategy = "umask" | "read-based" | "all";
+export type Strategy = 'umask' | 'read-based' | 'all';
 
 /**
  * System umask value, read once at module load.
@@ -52,10 +52,10 @@ export function calculateUmaskExecuteBits(
  */
 export function calculateNewMode(
   mode: number,
-  strategy: Strategy = "umask",
+  strategy: Strategy = 'umask',
   umask?: number
 ): number | null {
-  if (strategy === "umask") {
+  if (strategy === 'umask') {
     const executeBits = calculateUmaskExecuteBits(umask);
     if (executeBits === 0) {
       return null;
@@ -63,7 +63,7 @@ export function calculateNewMode(
     return mode | executeBits;
   }
 
-  if (strategy === "read-based") {
+  if (strategy === 'read-based') {
     const readBits = mode & 0o444;
     const executeBits = (readBits >> 2) & 0o111;
     if (executeBits === 0) {

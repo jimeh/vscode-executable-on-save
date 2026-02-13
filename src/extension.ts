@@ -1,6 +1,6 @@
-import * as vscode from "vscode";
-import { processDocument } from "./document-handler";
-import { onSaveEnabled } from "./config";
+import * as vscode from 'vscode';
+import { processDocument } from './document-handler';
+import { onSaveEnabled } from './config';
 
 /**
  * Activates the extension.
@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   const command = vscode.commands.registerCommand(
-    "executable-on-save.makeExecutableIfScript",
+    'executable-on-save.makeExecutableIfScript',
     async () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {

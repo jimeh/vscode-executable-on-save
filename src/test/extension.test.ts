@@ -1,14 +1,14 @@
-import * as assert from "assert";
-import * as vscode from "vscode";
-import { chmod, mkdtemp, rm, stat, writeFile } from "node:fs/promises";
-import { join } from "node:path";
-import { tmpdir } from "node:os";
-import sinon from "sinon";
+import * as assert from 'assert';
+import * as vscode from 'vscode';
+import { chmod, mkdtemp, rm, stat, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import sinon from 'sinon';
 
-const CONFIG_SECTION = "executableOnSave";
-const CONFIG_ENABLE_KEY = "enabled";
-const CONFIG_PERMISSION_STRATEGY_KEY = "permissionStrategy";
-const CONFIG_SILENT_KEY = "silent";
+const CONFIG_SECTION = 'executableOnSave';
+const CONFIG_ENABLE_KEY = 'enabled';
+const CONFIG_PERMISSION_STRATEGY_KEY = 'permissionStrategy';
+const CONFIG_SILENT_KEY = 'silent';
 
 async function waitFor(
   predicate: () => Promise<boolean>,
@@ -24,7 +24,7 @@ async function waitFor(
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
 
-  throw new Error("Timed out waiting for condition");
+  throw new Error('Timed out waiting for condition');
 }
 
 /**
@@ -41,7 +41,7 @@ async function waitForStable(
   const start = Date.now();
   while (Date.now() - start < windowMs) {
     if (!(await predicate())) {
-      throw new Error("Condition became false during stability window");
+      throw new Error('Condition became false during stability window');
     }
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
@@ -56,7 +56,7 @@ interface TestCase {
   content: string;
   initialMode: number;
   configEnabled: boolean;
-  permissionStrategy: "umask" | "read-based" | "all";
+  permissionStrategy: 'umask' | 'read-based' | 'all';
   silent?: boolean;
   expectedExecutable: boolean;
   shouldChangeMode: boolean;
@@ -64,16 +64,16 @@ interface TestCase {
   expectedNotificationMessage?: string;
 }
 
-suite("Executable on save", function () {
+suite('Executable on save', function () {
   this.timeout(10000);
 
-  if (process.platform === "win32") {
+  if (process.platform === 'win32') {
     return;
   }
 
   let sandbox: sinon.SinonSandbox;
   let configEnabled = true;
-  let permissionStrategy: "umask" | "read-based" | "all" = "umask";
+  let permissionStrategy: 'umask' | 'read-based' | 'all' = 'umask';
   let silent = false;
   let showInformationMessageStub: sinon.SinonStub;
 
@@ -82,7 +82,7 @@ suite("Executable on save", function () {
     const originalGetConfiguration = vscode.workspace.getConfiguration;
 
     sandbox
-      .stub(vscode.workspace, "getConfiguration")
+      .stub(vscode.workspace, 'getConfiguration')
       .callsFake((section: any, scope?: any) => {
         if (section === CONFIG_SECTION) {
           const fakeConfig: Partial<vscode.WorkspaceConfiguration> = {
@@ -106,7 +106,7 @@ suite("Executable on save", function () {
       });
 
     showInformationMessageStub = sandbox
-      .stub(vscode.window, "showInformationMessage")
+      .stub(vscode.window, 'showInformationMessage')
       .resolves(undefined as unknown as vscode.MessageItem);
   });
 
@@ -114,7 +114,7 @@ suite("Executable on save", function () {
     // Close any open editors and let in-flight save handlers drain
     // before restoring stubs. This prevents late-firing handlers from
     // a slow test bleeding into the next test's stub state.
-    await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+    await vscode.commands.executeCommand('workbench.action.closeAllEditors');
     await delay(100);
 
     sandbox.restore();
@@ -124,294 +124,294 @@ suite("Executable on save", function () {
   const testCases: TestCase[] = [
     // Umask strategy tests
     {
-      name: "umask strategy: makes shebang file executable",
+      name: 'umask strategy: makes shebang file executable',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     {
-      name: "umask strategy: 0o600 gets execute bits",
+      name: 'umask strategy: 0o600 gets execute bits',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o600,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     {
-      name: "umask strategy: 0o640 gets execute bits",
+      name: 'umask strategy: 0o640 gets execute bits',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o640,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     {
-      name: "umask strategy: 0o664 gets execute bits",
+      name: 'umask strategy: 0o664 gets execute bits',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o664,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     {
-      name: "umask strategy: preserves special bits (setuid)",
+      name: 'umask strategy: preserves special bits (setuid)',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o4644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     {
-      name: "umask strategy: preserves special bits (setgid)",
+      name: 'umask strategy: preserves special bits (setgid)',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o2644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     {
-      name: "umask strategy: preserves special bits (sticky)",
+      name: 'umask strategy: preserves special bits (sticky)',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o1644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     {
-      name: "umask strategy: respects already executable files",
+      name: 'umask strategy: respects already executable files',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o755,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: true,
       shouldChangeMode: false,
     },
     {
-      name: "umask strategy: handles python shebang",
+      name: 'umask strategy: handles python shebang',
       content: '#!/usr/bin/env python3\nprint("hello")\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     {
-      name: "umask strategy: handles node shebang",
+      name: 'umask strategy: handles node shebang',
       content: '#!/usr/bin/env node\nconsole.log("hello");\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     {
-      name: "umask strategy: skips files without shebang",
+      name: 'umask strategy: skips files without shebang',
       content: 'echo "hello"\n# no shebang here\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: false,
       shouldChangeMode: false,
     },
     {
-      name: "umask strategy: handles empty file",
-      content: "",
+      name: 'umask strategy: handles empty file',
+      content: '',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: false,
       shouldChangeMode: false,
     },
     {
-      name: "umask strategy: with notification",
+      name: 'umask strategy: with notification',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       silent: false,
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     // General behavior tests (using default umask strategy)
     {
-      name: "does not change permissions when file is already executable",
+      name: 'does not change permissions when file is already executable',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o755,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: true,
       shouldChangeMode: false,
     },
     {
-      name: "does not change permissions for empty file",
-      content: "",
+      name: 'does not change permissions for empty file',
+      content: '',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: false,
       shouldChangeMode: false,
     },
     {
-      name: "does not change permissions for file without shebang",
+      name: 'does not change permissions for file without shebang',
       content: 'echo "hello"\n# This is a script without shebang\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: false,
       shouldChangeMode: false,
     },
     {
-      name: "does not change permissions when feature is disabled",
+      name: 'does not change permissions when feature is disabled',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o644,
       configEnabled: false,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: false,
       shouldChangeMode: false,
     },
     {
-      name: "handles python shebang correctly",
+      name: 'handles python shebang correctly',
       content: '#!/usr/bin/env python3\nprint("hello")\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     {
-      name: "handles node shebang correctly",
+      name: 'handles node shebang correctly',
       content: '#!/usr/bin/env node\nconsole.log("hello");\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     {
-      name: "ignores shebang not at beginning of file",
+      name: 'ignores shebang not at beginning of file',
       content: '# Comment first\n#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: false,
       shouldChangeMode: false,
     },
     {
-      name: "handles single character shebang line",
-      content: "#!\n",
+      name: 'handles single character shebang line',
+      content: '#!\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     {
-      name: "handles BOM before shebang",
-      content: "\uFEFF#!/usr/bin/env bash\necho hello\n",
+      name: 'handles BOM before shebang',
+      content: '\uFEFF#!/usr/bin/env bash\necho hello\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     // Read-based permission strategy test cases
     {
-      name: "read-based strategy: makes shebang file executable",
+      name: 'read-based strategy: makes shebang file executable',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "read-based",
+      permissionStrategy: 'read-based',
       expectedExecutable: true,
       shouldChangeMode: true,
       expectedMode: 0o755,
     },
     {
-      name: "read-based strategy: 0o644 -> 0o755 (read+write becomes read+write+execute)",
+      name: 'read-based strategy: 0o644 -> 0o755 (read+write becomes read+write+execute)',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "read-based",
+      permissionStrategy: 'read-based',
       expectedExecutable: true,
       shouldChangeMode: true,
       expectedMode: 0o755, // r--+r--+r-- becomes rwx+r-x+r-x
     },
     {
-      name: "read-based strategy: 0o600 -> 0o700 (user-only read+write)",
+      name: 'read-based strategy: 0o600 -> 0o700 (user-only read+write)',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o600,
       configEnabled: true,
-      permissionStrategy: "read-based",
+      permissionStrategy: 'read-based',
       expectedExecutable: true,
       shouldChangeMode: true,
       expectedMode: 0o700, // rw-+---+--- becomes rwx+---+---
     },
     {
-      name: "read-based strategy: 0o640 -> 0o750 (user rw, group r)",
+      name: 'read-based strategy: 0o640 -> 0o750 (user rw, group r)',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o640,
       configEnabled: true,
-      permissionStrategy: "read-based",
+      permissionStrategy: 'read-based',
       expectedExecutable: true,
       shouldChangeMode: true,
       expectedMode: 0o750, // rw-+r--+--- becomes rwx+r-x+---
     },
     {
-      name: "read-based strategy: 0o664 -> 0o775 (all have read+write)",
+      name: 'read-based strategy: 0o664 -> 0o775 (all have read+write)',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o664,
       configEnabled: true,
-      permissionStrategy: "read-based",
+      permissionStrategy: 'read-based',
       expectedExecutable: true,
       shouldChangeMode: true,
       expectedMode: 0o775, // rw-+rw-+r-- becomes rwx+rwx+r-x
     },
     // Notification tests
     {
-      name: "displays notification when permissions change and silent is false",
+      name: 'displays notification when permissions change and silent is false',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       silent: false,
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     {
-      name: "suppresses notification when silent is enabled",
+      name: 'suppresses notification when silent is enabled',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "umask",
+      permissionStrategy: 'umask',
       silent: true,
       expectedExecutable: true,
       shouldChangeMode: true,
     },
     // All strategy tests for backward compatibility
     {
-      name: "all strategy: 0o644 -> 0o755 (add execute for all)",
+      name: 'all strategy: 0o644 -> 0o755 (add execute for all)',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o644,
       configEnabled: true,
-      permissionStrategy: "all",
+      permissionStrategy: 'all',
       expectedExecutable: true,
       shouldChangeMode: true,
       expectedMode: 0o755,
     },
     {
-      name: "all strategy: 0o600 -> 0o711 (add execute for all)",
+      name: 'all strategy: 0o600 -> 0o711 (add execute for all)',
       content: '#!/usr/bin/env bash\necho "hello"\n',
       initialMode: 0o600,
       configEnabled: true,
-      permissionStrategy: "all",
+      permissionStrategy: 'all',
       expectedExecutable: true,
       shouldChangeMode: true,
       expectedMode: 0o711, // rw-+---+--- becomes rwx+--x+--x
@@ -425,8 +425,8 @@ suite("Executable on save", function () {
       silent = testCase.silent ?? false;
       showInformationMessageStub.resetHistory();
 
-      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
-      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+      const tempDir = await mkdtemp(join(tmpdir(), 'mark-exec-test-'));
+      const fileUri = vscode.Uri.file(join(tempDir, 'test-script'));
 
       // Create file with specified content and mode
       await writeFile(fileUri.fsPath, testCase.content, {
@@ -440,7 +440,7 @@ suite("Executable on save", function () {
       assert.strictEqual(
         initialExecutable,
         (testCase.initialMode & 0o111) !== 0,
-        "Initial executable state should match expectation"
+        'Initial executable state should match expectation'
       );
 
       // Open document and make a change to trigger save
@@ -451,13 +451,13 @@ suite("Executable on save", function () {
       await editor.edit((editBuilder) => {
         editBuilder.insert(
           new vscode.Position(editor.document.lineCount, 0),
-          "# test comment\n"
+          '# test comment\n'
         );
       });
 
       // Save the document
       const saved = await editor.document.save();
-      assert.ok(saved, "Expected document.save() to succeed");
+      assert.ok(saved, 'Expected document.save() to succeed');
 
       if (testCase.shouldChangeMode) {
         // Wait for mode change if we expect it
@@ -484,7 +484,7 @@ suite("Executable on save", function () {
       assert.strictEqual(
         finalExecutable,
         testCase.expectedExecutable,
-        `File should ${testCase.expectedExecutable ? "be" : "not be"} executable`
+        `File should ${testCase.expectedExecutable ? 'be' : 'not be'} executable`
       );
 
       // Check specific mode if provided
@@ -502,36 +502,36 @@ suite("Executable on save", function () {
       assert.strictEqual(
         showInformationMessageStub.callCount,
         expectedNotificationCalls,
-        "Unexpected number of information messages"
+        'Unexpected number of information messages'
       );
 
       if (testCase.expectedNotificationMessage !== undefined) {
         assert.strictEqual(
           showInformationMessageStub.firstCall?.args?.[0],
           testCase.expectedNotificationMessage,
-          "Notification message should match expected value"
+          'Notification message should match expected value'
         );
       }
 
       // Cleanup
       await vscode.commands.executeCommand(
-        "workbench.action.closeActiveEditor"
+        'workbench.action.closeActiveEditor'
       );
       await rm(tempDir, { force: true, recursive: true });
     });
   });
 
   // Test for untitled documents (special case since they don't have file paths)
-  test("does not process untitled documents", async () => {
+  test('does not process untitled documents', async () => {
     configEnabled = true;
-    permissionStrategy = "read-based";
+    permissionStrategy = 'read-based';
 
     const document = await vscode.workspace.openTextDocument({
       content: '#!/usr/bin/env bash\necho "hello"\n',
-      language: "shellscript",
+      language: 'shellscript',
     });
 
-    assert.ok(document.isUntitled, "Document should be untitled");
+    assert.ok(document.isUntitled, 'Document should be untitled');
 
     const editor = await vscode.window.showTextDocument(document, {
       preview: false,
@@ -541,31 +541,31 @@ suite("Executable on save", function () {
     await editor.edit((editBuilder) => {
       editBuilder.insert(
         new vscode.Position(editor.document.lineCount, 0),
-        "# test\n"
+        '# test\n'
       );
     });
 
     // Verify the document is untitled and has file scheme "untitled"
-    assert.ok(document.isUntitled, "Document should still be untitled");
+    assert.ok(document.isUntitled, 'Document should still be untitled');
     assert.notStrictEqual(
       document.uri.scheme,
-      "file",
-      "Untitled document should not have file scheme"
+      'file',
+      'Untitled document should not have file scheme'
     );
 
     // The extension should handle this gracefully without attempting file operations
     // We don't actually need to save - just verify the document state
-    await vscode.commands.executeCommand("workbench.action.closeActiveEditor");
+    await vscode.commands.executeCommand('workbench.action.closeActiveEditor');
   });
 
   // Test for non-file URIs (like git: scheme)
-  test("does not process non-file URI schemes", async () => {
+  test('does not process non-file URI schemes', async () => {
     configEnabled = true;
-    permissionStrategy = "read-based";
+    permissionStrategy = 'read-based';
 
     // Create a real file first to base the git URI on
-    const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-git-test-"));
-    const filePath = join(tempDir, "script.sh");
+    const tempDir = await mkdtemp(join(tmpdir(), 'mark-exec-git-test-'));
+    const filePath = join(tempDir, 'script.sh');
     await writeFile(filePath, '#!/usr/bin/env bash\necho "hello"\n', {
       mode: 0o644,
     });
@@ -574,8 +574,8 @@ suite("Executable on save", function () {
     const gitUri = vscode.Uri.parse(`git:${filePath}`);
     assert.notStrictEqual(
       gitUri.scheme,
-      "file",
-      "URI should not be file scheme"
+      'file',
+      'URI should not be file scheme'
     );
 
     // We can't easily test this with VS Code's openTextDocument since it
@@ -586,15 +586,15 @@ suite("Executable on save", function () {
     await rm(tempDir, { force: true, recursive: true });
   });
 
-  suite("shebang edge cases", () => {
-    test("ignores file with only # (not #!)", async () => {
+  suite('shebang edge cases', () => {
+    test('ignores file with only # (not #!)', async () => {
       configEnabled = true;
-      permissionStrategy = "read-based";
+      permissionStrategy = 'read-based';
 
-      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
-      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+      const tempDir = await mkdtemp(join(tmpdir(), 'mark-exec-test-'));
+      const fileUri = vscode.Uri.file(join(tempDir, 'test-script'));
 
-      await writeFile(fileUri.fsPath, "#\necho hello", { mode: 0o644 });
+      await writeFile(fileUri.fsPath, '#\necho hello', { mode: 0o644 });
 
       const document = await vscode.workspace.openTextDocument(fileUri);
       const editor = await vscode.window.showTextDocument(document, {
@@ -603,7 +603,7 @@ suite("Executable on save", function () {
       await editor.edit((editBuilder) => {
         editBuilder.insert(
           new vscode.Position(editor.document.lineCount, 0),
-          "# test\n"
+          '# test\n'
         );
       });
 
@@ -617,23 +617,23 @@ suite("Executable on save", function () {
       assert.strictEqual(
         finalExecutable,
         false,
-        "File should not be executable"
+        'File should not be executable'
       );
 
       await vscode.commands.executeCommand(
-        "workbench.action.closeActiveEditor"
+        'workbench.action.closeActiveEditor'
       );
       await rm(tempDir, { force: true, recursive: true });
     });
 
-    test("ignores file with whitespace before shebang", async () => {
+    test('ignores file with whitespace before shebang', async () => {
       configEnabled = true;
-      permissionStrategy = "read-based";
+      permissionStrategy = 'read-based';
 
-      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
-      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+      const tempDir = await mkdtemp(join(tmpdir(), 'mark-exec-test-'));
+      const fileUri = vscode.Uri.file(join(tempDir, 'test-script'));
 
-      await writeFile(fileUri.fsPath, " #!/bin/bash\necho hello", {
+      await writeFile(fileUri.fsPath, ' #!/bin/bash\necho hello', {
         mode: 0o644,
       });
 
@@ -644,7 +644,7 @@ suite("Executable on save", function () {
       await editor.edit((editBuilder) => {
         editBuilder.insert(
           new vscode.Position(editor.document.lineCount, 0),
-          "# test\n"
+          '# test\n'
         );
       });
 
@@ -658,23 +658,23 @@ suite("Executable on save", function () {
       assert.strictEqual(
         finalExecutable,
         false,
-        "File should not be executable"
+        'File should not be executable'
       );
 
       await vscode.commands.executeCommand(
-        "workbench.action.closeActiveEditor"
+        'workbench.action.closeActiveEditor'
       );
       await rm(tempDir, { force: true, recursive: true });
     });
 
-    test("handles file with only one character", async () => {
+    test('handles file with only one character', async () => {
       configEnabled = true;
-      permissionStrategy = "read-based";
+      permissionStrategy = 'read-based';
 
-      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
-      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+      const tempDir = await mkdtemp(join(tmpdir(), 'mark-exec-test-'));
+      const fileUri = vscode.Uri.file(join(tempDir, 'test-script'));
 
-      await writeFile(fileUri.fsPath, "#", { mode: 0o644 });
+      await writeFile(fileUri.fsPath, '#', { mode: 0o644 });
 
       const document = await vscode.workspace.openTextDocument(fileUri);
       const editor = await vscode.window.showTextDocument(document, {
@@ -683,7 +683,7 @@ suite("Executable on save", function () {
       await editor.edit((editBuilder) => {
         editBuilder.insert(
           new vscode.Position(editor.document.lineCount, 0),
-          "# test\n"
+          '# test\n'
         );
       });
 
@@ -697,23 +697,23 @@ suite("Executable on save", function () {
       assert.strictEqual(
         finalExecutable,
         false,
-        "File should not be executable"
+        'File should not be executable'
       );
 
       await vscode.commands.executeCommand(
-        "workbench.action.closeActiveEditor"
+        'workbench.action.closeActiveEditor'
       );
       await rm(tempDir, { force: true, recursive: true });
     });
   });
 
-  suite("read-based strategy with no read permissions", () => {
-    test("does not make executable when file has no read permissions", async () => {
+  suite('read-based strategy with no read permissions', () => {
+    test('does not make executable when file has no read permissions', async () => {
       configEnabled = true;
-      permissionStrategy = "read-based";
+      permissionStrategy = 'read-based';
 
-      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
-      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+      const tempDir = await mkdtemp(join(tmpdir(), 'mark-exec-test-'));
+      const fileUri = vscode.Uri.file(join(tempDir, 'test-script'));
 
       // Create file with normal permissions first so VS Code can open it
       await writeFile(fileUri.fsPath, '#!/bin/bash\necho "hello"\n', {
@@ -731,7 +731,7 @@ suite("Executable on save", function () {
       await editor.edit((editBuilder) => {
         editBuilder.insert(
           new vscode.Position(editor.document.lineCount, 0),
-          "# test\n"
+          '# test\n'
         );
       });
 
@@ -745,23 +745,23 @@ suite("Executable on save", function () {
       assert.strictEqual(
         finalMode,
         0o200,
-        "File mode should remain 0o200 (no execute added)"
+        'File mode should remain 0o200 (no execute added)'
       );
 
       await vscode.commands.executeCommand(
-        "workbench.action.closeActiveEditor"
+        'workbench.action.closeActiveEditor'
       );
       await rm(tempDir, { force: true, recursive: true });
     });
   });
 
-  suite("umask strategy behavior", () => {
-    test("umask strategy adds execute bits according to system umask", async () => {
+  suite('umask strategy behavior', () => {
+    test('umask strategy adds execute bits according to system umask', async () => {
       configEnabled = true;
-      permissionStrategy = "umask";
+      permissionStrategy = 'umask';
 
-      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
-      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+      const tempDir = await mkdtemp(join(tmpdir(), 'mark-exec-test-'));
+      const fileUri = vscode.Uri.file(join(tempDir, 'test-script'));
 
       await writeFile(fileUri.fsPath, '#!/bin/bash\necho "hello"\n', {
         mode: 0o644,
@@ -774,7 +774,7 @@ suite("Executable on save", function () {
       await editor.edit((editBuilder) => {
         editBuilder.insert(
           new vscode.Position(editor.document.lineCount, 0),
-          "# test\n"
+          '# test\n'
         );
       });
 
@@ -788,26 +788,26 @@ suite("Executable on save", function () {
       const executeBits = finalMode & 0o111;
 
       // Verify at least user execute bit is set
-      assert.ok(executeBits & 0o100, "User execute bit should be set");
+      assert.ok(executeBits & 0o100, 'User execute bit should be set');
 
       // Verify file is executable
       assert.ok(
         (finalMode & 0o111) !== 0,
-        "File should have execute permission"
+        'File should have execute permission'
       );
 
       await vscode.commands.executeCommand(
-        "workbench.action.closeActiveEditor"
+        'workbench.action.closeActiveEditor'
       );
       await rm(tempDir, { force: true, recursive: true });
     });
 
-    test("umask strategy only adds execute bits", async () => {
+    test('umask strategy only adds execute bits', async () => {
       configEnabled = true;
-      permissionStrategy = "umask";
+      permissionStrategy = 'umask';
 
-      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
-      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+      const tempDir = await mkdtemp(join(tmpdir(), 'mark-exec-test-'));
+      const fileUri = vscode.Uri.file(join(tempDir, 'test-script'));
 
       const initialMode = 0o644;
       await writeFile(fileUri.fsPath, '#!/bin/bash\necho "hello"\n', {
@@ -825,7 +825,7 @@ suite("Executable on save", function () {
       await editor.edit((editBuilder) => {
         editBuilder.insert(
           new vscode.Position(editor.document.lineCount, 0),
-          "# test\n"
+          '# test\n'
         );
       });
 
@@ -842,24 +842,24 @@ suite("Executable on save", function () {
       const finalExecute = finalMode & 0o111;
       assert.ok(
         finalExecute >= beforeExecute,
-        "Execute bits should be added or unchanged"
+        'Execute bits should be added or unchanged'
       );
 
       // Verify at least user execute is set
-      assert.ok(finalExecute & 0o100, "User execute bit should be set");
+      assert.ok(finalExecute & 0o100, 'User execute bit should be set');
 
       await vscode.commands.executeCommand(
-        "workbench.action.closeActiveEditor"
+        'workbench.action.closeActiveEditor'
       );
       await rm(tempDir, { force: true, recursive: true });
     });
 
-    test("umask strategy works with manual command", async () => {
+    test('umask strategy works with manual command', async () => {
       configEnabled = true;
-      permissionStrategy = "umask";
+      permissionStrategy = 'umask';
 
-      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
-      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+      const tempDir = await mkdtemp(join(tmpdir(), 'mark-exec-test-'));
+      const fileUri = vscode.Uri.file(join(tempDir, 'test-script'));
 
       await writeFile(fileUri.fsPath, '#!/bin/bash\necho "hello"\n', {
         mode: 0o644,
@@ -870,7 +870,7 @@ suite("Executable on save", function () {
 
       // Run the command
       await vscode.commands.executeCommand(
-        "executable-on-save.makeExecutableIfScript"
+        'executable-on-save.makeExecutableIfScript'
       );
 
       // Wait for permission change
@@ -883,23 +883,23 @@ suite("Executable on save", function () {
 
       assert.ok(
         (finalMode & 0o111) !== 0,
-        "File should have execute permission"
+        'File should have execute permission'
       );
 
       await vscode.commands.executeCommand(
-        "workbench.action.closeActiveEditor"
+        'workbench.action.closeActiveEditor'
       );
       await rm(tempDir, { force: true, recursive: true });
     });
   });
 
-  suite("manual command", () => {
-    test("makes file executable when command is run", async () => {
+  suite('manual command', () => {
+    test('makes file executable when command is run', async () => {
       configEnabled = true;
-      permissionStrategy = "read-based";
+      permissionStrategy = 'read-based';
 
-      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
-      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+      const tempDir = await mkdtemp(join(tmpdir(), 'mark-exec-test-'));
+      const fileUri = vscode.Uri.file(join(tempDir, 'test-script'));
 
       await writeFile(fileUri.fsPath, '#!/bin/bash\necho "hello"\n', {
         mode: 0o644,
@@ -910,7 +910,7 @@ suite("Executable on save", function () {
 
       // Run the command
       await vscode.commands.executeCommand(
-        "executable-on-save.makeExecutableIfScript"
+        'executable-on-save.makeExecutableIfScript'
       );
 
       // Wait for permission change
@@ -920,33 +920,33 @@ suite("Executable on save", function () {
 
       const finalStat = await stat(fileUri.fsPath);
       const finalMode = finalStat.mode & 0o777;
-      assert.strictEqual(finalMode, 0o755, "File should be executable");
+      assert.strictEqual(finalMode, 0o755, 'File should be executable');
 
       await vscode.commands.executeCommand(
-        "workbench.action.closeActiveEditor"
+        'workbench.action.closeActiveEditor'
       );
       await rm(tempDir, { force: true, recursive: true });
     });
 
-    test("command does nothing when no editor is active", async () => {
+    test('command does nothing when no editor is active', async () => {
       // Close all editors
-      await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+      await vscode.commands.executeCommand('workbench.action.closeAllEditors');
 
       // Command should not throw
       await vscode.commands.executeCommand(
-        "executable-on-save.makeExecutableIfScript"
+        'executable-on-save.makeExecutableIfScript'
       );
 
       // If we get here, the test passed
-      assert.ok(true, "Command handled gracefully with no active editor");
+      assert.ok(true, 'Command handled gracefully with no active editor');
     });
 
-    test("works when feature is disabled but manually triggered", async () => {
+    test('works when feature is disabled but manually triggered', async () => {
       configEnabled = false; // Feature disabled
-      permissionStrategy = "umask";
+      permissionStrategy = 'umask';
 
-      const tempDir = await mkdtemp(join(tmpdir(), "mark-exec-test-"));
-      const fileUri = vscode.Uri.file(join(tempDir, "test-script"));
+      const tempDir = await mkdtemp(join(tmpdir(), 'mark-exec-test-'));
+      const fileUri = vscode.Uri.file(join(tempDir, 'test-script'));
 
       await writeFile(fileUri.fsPath, '#!/bin/bash\necho "hello"\n', {
         mode: 0o644,
@@ -957,7 +957,7 @@ suite("Executable on save", function () {
 
       // Run the command manually
       await vscode.commands.executeCommand(
-        "executable-on-save.makeExecutableIfScript"
+        'executable-on-save.makeExecutableIfScript'
       );
 
       // Wait for permission change
@@ -969,11 +969,11 @@ suite("Executable on save", function () {
       const finalMode = finalStat.mode & 0o777;
       assert.ok(
         (finalMode & 0o111) !== 0,
-        "File should be executable even with feature disabled"
+        'File should be executable even with feature disabled'
       );
 
       await vscode.commands.executeCommand(
-        "workbench.action.closeActiveEditor"
+        'workbench.action.closeActiveEditor'
       );
       await rm(tempDir, { force: true, recursive: true });
     });
