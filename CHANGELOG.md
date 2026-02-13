@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.6](https://github.com/jimeh/vscode-executable-on-save/compare/v0.2.5...v0.2.6) (2026-02-13)
+
+
+### Bug Fixes
+
+* **test:** eliminate flaky integration tests caused by timing issues ([#43](https://github.com/jimeh/vscode-executable-on-save/issues/43)) ([15ac9c5](https://github.com/jimeh/vscode-executable-on-save/commit/15ac9c5a526dd8901d2e8f9777135bd4be6ef870))
+
+
+### Documentation
+
+* slim AGENTS.md and replace CLAUDE.md symlink with @-reference ([#41](https://github.com/jimeh/vscode-executable-on-save/issues/41)) ([bf3775e](https://github.com/jimeh/vscode-executable-on-save/commit/bf3775ed1f36a937c55b2843fe9aede33855f3bb))
+
 ## [0.2.5](https://github.com/jimeh/vscode-executable-on-save/compare/v0.2.4...v0.2.5) (2025-10-25)
 
 
