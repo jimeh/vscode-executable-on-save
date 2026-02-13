@@ -19,20 +19,33 @@ exists), and "all" (adds execute for user/group/other unconditionally).
 Node.js 20.x required (matches `@types/node` dependency).
 
 ```sh
-npm install
+pnpm install
 ```
 
 ## Development Commands
 
 ```sh
-npm run watch            # Continuous rebuild + type checking
-npm run compile          # Full build with lint and type checks
-npm run lint             # Run prettier + eslint checks
-npm run lint:fix         # Format with prettier and auto-fix eslint
-npm test                 # Run all tests (includes compile + lint)
-npm run compile-tests    # Compile tests to out/ directory
-npm run package          # Minified production build
+pnpm run watch            # Continuous rebuild + type checking
+pnpm run compile          # Full build with lint and type checks
+pnpm run lint             # Run prettier + eslint checks
+pnpm run lint:fix         # Format with prettier and auto-fix eslint
+pnpm test                 # Run all tests (includes compile + lint)
+pnpm run compile-tests    # Compile tests to out/ directory
+pnpm run package          # Minified production build
 ```
+
+## Packaging Commands
+
+```sh
+pnpm run vscode:package   # Build VSIX with descriptive filename
+pnpm run vsce:ls          # List files that will be in the VSIX
+pnpm run verify:vsix-files # Verify VSIX contains exactly expected files
+```
+
+VSIX packaging uses an explicit `"files"` allow-list in `package.json` (not
+`.vscodeignore`). When adding new files that should be in the package, update
+both the `"files"` array in `package.json` and the `EXPECTED_FILES` list in
+`scripts/verify-vsix-files.ts`.
 
 ## Architecture
 
@@ -76,8 +89,8 @@ All strategies preserve special bits (setuid, setgid, sticky).
 After making changes:
 
 ```sh
-npm run lint:fix
-npm test
+pnpm run lint:fix
+pnpm test
 ```
 
 ## Releases
@@ -139,6 +152,6 @@ Four settings in [package.json](package.json) under `executableOnSave.*`:
 
 ## Troubleshooting
 
-- **Stale builds**: Delete `dist/` and run `npm run compile`
-- **Test failures**: Ensure `npm run compile-tests` succeeds first
+- **Stale builds**: Delete `dist/` and run `pnpm run compile`
+- **Test failures**: Ensure `pnpm run compile-tests` succeeds first
 - **Watch mode errors**: Check console for esbuild problem matcher output
