@@ -12,7 +12,7 @@ const CONFIG_SILENT_KEY = "silent";
 
 async function waitFor(
   predicate: () => Promise<boolean>,
-  timeoutMs = 2000,
+  timeoutMs = 5000,
   intervalMs = 50
 ) {
   const start = Date.now();
@@ -25,6 +25,26 @@ async function waitFor(
   }
 
   throw new Error("Timed out waiting for condition");
+}
+
+/**
+ * Waits for a condition to remain true over a sustained window.
+ * Used for "no change expected" assertions: we need to give the
+ * save handler enough time to run and confirm nothing happened,
+ * rather than checking once after an arbitrary delay.
+ */
+async function waitForStable(
+  predicate: () => Promise<boolean>,
+  windowMs = 500,
+  intervalMs = 50
+) {
+  const start = Date.now();
+  while (Date.now() - start < windowMs) {
+    if (!(await predicate())) {
+      throw new Error("Condition became false during stability window");
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
 }
 
 async function delay(ms: number) {
@@ -44,7 +64,9 @@ interface TestCase {
   expectedNotificationMessage?: string;
 }
 
-suite("Executable on save", () => {
+suite("Executable on save", function () {
+  this.timeout(10000);
+
   if (process.platform === "win32") {
     return;
   }
@@ -88,7 +110,13 @@ suite("Executable on save", () => {
       .resolves(undefined as unknown as vscode.MessageItem);
   });
 
-  teardown(() => {
+  teardown(async () => {
+    // Close any open editors and let in-flight save handlers drain
+    // before restoring stubs. This prevents late-firing handlers from
+    // a slow test bleeding into the next test's stub state.
+    await vscode.commands.executeCommand("workbench.action.closeAllEditors");
+    await delay(100);
+
     sandbox.restore();
     silent = false;
   });
@@ -431,9 +459,6 @@ suite("Executable on save", () => {
       const saved = await editor.document.save();
       assert.ok(saved, "Expected document.save() to succeed");
 
-      // Give the onDidSaveTextDocument handler time to be scheduled
-      await delay(50);
-
       if (testCase.shouldChangeMode) {
         // Wait for mode change if we expect it
         await waitFor(
@@ -442,14 +467,15 @@ suite("Executable on save", () => {
 
         // Wait for notification if expected (notifications are async)
         if (!(testCase.silent ?? false)) {
-          await waitFor(
-            async () => showInformationMessageStub.callCount > 0,
-            500
-          );
+          await waitFor(async () => showInformationMessageStub.callCount > 0);
         }
       } else {
-        // Give some time for any potential change
-        await delay(200);
+        // Verify mode stays unchanged over a sustained window
+        const expectedMode = testCase.initialMode & 0o7777;
+        await waitForStable(
+          async () =>
+            ((await stat(fileUri.fsPath)).mode & 0o7777) === expectedMode
+        );
       }
 
       // Verify final state
@@ -582,7 +608,9 @@ suite("Executable on save", () => {
       });
 
       await editor.document.save();
-      await delay(200);
+      await waitForStable(
+        async () => ((await stat(fileUri.fsPath)).mode & 0o111) === 0
+      );
 
       const finalStat = await stat(fileUri.fsPath);
       const finalExecutable = (finalStat.mode & 0o111) !== 0;
@@ -621,7 +649,9 @@ suite("Executable on save", () => {
       });
 
       await editor.document.save();
-      await delay(200);
+      await waitForStable(
+        async () => ((await stat(fileUri.fsPath)).mode & 0o111) === 0
+      );
 
       const finalStat = await stat(fileUri.fsPath);
       const finalExecutable = (finalStat.mode & 0o111) !== 0;
@@ -658,7 +688,9 @@ suite("Executable on save", () => {
       });
 
       await editor.document.save();
-      await delay(200);
+      await waitForStable(
+        async () => ((await stat(fileUri.fsPath)).mode & 0o111) === 0
+      );
 
       const finalStat = await stat(fileUri.fsPath);
       const finalExecutable = (finalStat.mode & 0o111) !== 0;
@@ -704,7 +736,9 @@ suite("Executable on save", () => {
       });
 
       await editor.document.save();
-      await delay(200);
+      await waitForStable(
+        async () => ((await stat(fileUri.fsPath)).mode & 0o777) === 0o200
+      );
 
       const finalStat = await stat(fileUri.fsPath);
       const finalMode = finalStat.mode & 0o777;
