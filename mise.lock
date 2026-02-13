@@ -1,11 +1,3 @@
 [[tools.node]]
 version = "20.19.5"
 backend = "core:node"
-
-[[tools."npm:@vscode/vsce"]]
-version = "3.6.2"
-backend = "npm:@vscode/vsce"
-
-[[tools."npm:ovsx"]]
-version = "0.10.6"
-backend = "npm:ovsx"
