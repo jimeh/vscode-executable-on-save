@@ -23,7 +23,11 @@
   ],
   "capabilities": {
     "untrustedWorkspaces": {
-      "supported": true
+      "supported": "limited",
+      "description": "File permission changes are disabled in untrusted workspaces.",
+      "restrictedConfigurations": [
+        "executableOnSave.permissionStrategy"
+      ]
     },
     "virtualWorkspaces": {
       "supported": false,
@@ -81,7 +85,7 @@
       {
         "command": "executable-on-save.makeExecutableIfScript",
         "title": "Make Executable If Script",
-        "enablement": "editorIsOpen"
+        "enablement": "editorIsOpen && isWorkspaceTrusted"
       }
     ],
     "configuration": {

@@ -31,6 +31,10 @@ After changes: `pnpm run lint:fix && pnpm test`
   — grep for `calculateNewMode`
 - Config keys under `executableOnSave.*` — defined in package.json
   `contributes.configuration`
+- Workspace trust: `"supported": "limited"` — chmod disabled in
+  untrusted workspaces via `shouldSkipDocument()` guard.
+  `restrictedConfigurations` protects `permissionStrategy` from
+  workspace-level override in restricted mode
 - Tests run in VS Code Electron via `@vscode/test-cli` + Mocha + Sinon
 - Tests colocated in `src/test/`, compiled to `out/` (separate from
   esbuild bundle in `dist/`)
