@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.6](https://github.com/jimeh/vscode-executable-on-save/compare/v0.2.5...v0.2.6) (2026-02-14)
+
+
+### Bug Fixes
+
+* prefix glob patterns with ./ in workflow shells to prevent option parsing ([#45](https://github.com/jimeh/vscode-executable-on-save/issues/45)) ([d85ef33](https://github.com/jimeh/vscode-executable-on-save/commit/d85ef33d01deb42ad0ff4f2554316177888f3cec))
+
 ## [0.2.5](https://github.com/jimeh/vscode-executable-on-save/compare/v0.2.4...v0.2.5) (2025-10-25)
 
 
