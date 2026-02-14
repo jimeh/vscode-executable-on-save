@@ -67,6 +67,10 @@ function shouldSkipDocument(document: vscode.TextDocument): boolean {
     return true;
   }
 
+  if (!vscode.workspace.isTrusted) {
+    return true;
+  }
+
   if (document.isUntitled) {
     return true;
   }

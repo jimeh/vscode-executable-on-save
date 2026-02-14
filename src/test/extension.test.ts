@@ -893,6 +893,217 @@ suite('Executable on save', function () {
     });
   });
 
+  suite('workspace trust', () => {
+    let originalIsTrustedDescriptor: PropertyDescriptor | undefined;
+
+    setup(() => {
+      originalIsTrustedDescriptor = Object.getOwnPropertyDescriptor(
+        vscode.workspace,
+        'isTrusted'
+      );
+    });
+
+    teardown(() => {
+      if (originalIsTrustedDescriptor) {
+        Object.defineProperty(
+          vscode.workspace,
+          'isTrusted',
+          originalIsTrustedDescriptor
+        );
+      }
+    });
+
+    function stubIsTrusted(value: boolean) {
+      Object.defineProperty(vscode.workspace, 'isTrusted', {
+        get: () => value,
+        configurable: true,
+      });
+    }
+
+    test('does not chmod in untrusted workspace', async () => {
+      configEnabled = true;
+      permissionStrategy = 'umask';
+      stubIsTrusted(false);
+
+      const tempDir = await mkdtemp(join(tmpdir(), 'mark-exec-test-'));
+      const fileUri = vscode.Uri.file(join(tempDir, 'test-script'));
+
+      await writeFile(fileUri.fsPath, '#!/usr/bin/env bash\necho "hello"\n', {
+        mode: 0o644,
+      });
+
+      const document = await vscode.workspace.openTextDocument(fileUri);
+      const editor = await vscode.window.showTextDocument(document, {
+        preview: false,
+      });
+      await editor.edit((editBuilder) => {
+        editBuilder.insert(
+          new vscode.Position(editor.document.lineCount, 0),
+          '# test\n'
+        );
+      });
+
+      await editor.document.save();
+      await waitForStable(
+        async () => ((await stat(fileUri.fsPath)).mode & 0o111) === 0
+      );
+
+      const finalStat = await stat(fileUri.fsPath);
+      assert.strictEqual(
+        finalStat.mode & 0o111,
+        0,
+        'File should not be executable in untrusted workspace'
+      );
+
+      await vscode.commands.executeCommand(
+        'workbench.action.closeActiveEditor'
+      );
+      await rm(tempDir, { force: true, recursive: true });
+    });
+
+    test('chmods normally in trusted workspace', async () => {
+      configEnabled = true;
+      permissionStrategy = 'umask';
+      stubIsTrusted(true);
+
+      const tempDir = await mkdtemp(join(tmpdir(), 'mark-exec-test-'));
+      const fileUri = vscode.Uri.file(join(tempDir, 'test-script'));
+
+      await writeFile(fileUri.fsPath, '#!/usr/bin/env bash\necho "hello"\n', {
+        mode: 0o644,
+      });
+
+      const document = await vscode.workspace.openTextDocument(fileUri);
+      const editor = await vscode.window.showTextDocument(document, {
+        preview: false,
+      });
+      await editor.edit((editBuilder) => {
+        editBuilder.insert(
+          new vscode.Position(editor.document.lineCount, 0),
+          '# test\n'
+        );
+      });
+
+      await editor.document.save();
+      await waitFor(
+        async () => ((await stat(fileUri.fsPath)).mode & 0o111) !== 0
+      );
+
+      const finalStat = await stat(fileUri.fsPath);
+      assert.ok(
+        (finalStat.mode & 0o111) !== 0,
+        'File should be executable in trusted workspace'
+      );
+
+      await vscode.commands.executeCommand(
+        'workbench.action.closeActiveEditor'
+      );
+      await rm(tempDir, { force: true, recursive: true });
+    });
+
+    test('manual command blocked in untrusted workspace', async () => {
+      configEnabled = true;
+      permissionStrategy = 'umask';
+      stubIsTrusted(false);
+
+      const tempDir = await mkdtemp(join(tmpdir(), 'mark-exec-test-'));
+      const fileUri = vscode.Uri.file(join(tempDir, 'test-script'));
+
+      await writeFile(fileUri.fsPath, '#!/usr/bin/env bash\necho "hello"\n', {
+        mode: 0o644,
+      });
+
+      const document = await vscode.workspace.openTextDocument(fileUri);
+      await vscode.window.showTextDocument(document, { preview: false });
+
+      await vscode.commands.executeCommand(
+        'executable-on-save.makeExecutableIfScript'
+      );
+
+      await waitForStable(
+        async () => ((await stat(fileUri.fsPath)).mode & 0o111) === 0
+      );
+
+      const finalStat = await stat(fileUri.fsPath);
+      assert.strictEqual(
+        finalStat.mode & 0o111,
+        0,
+        'Manual command should not chmod in untrusted workspace'
+      );
+
+      await vscode.commands.executeCommand(
+        'workbench.action.closeActiveEditor'
+      );
+      await rm(tempDir, { force: true, recursive: true });
+    });
+
+    test('starts working after trust is granted mid-session', async () => {
+      configEnabled = true;
+      permissionStrategy = 'umask';
+      let trusted = false;
+      Object.defineProperty(vscode.workspace, 'isTrusted', {
+        get: () => trusted,
+        configurable: true,
+      });
+
+      const tempDir = await mkdtemp(join(tmpdir(), 'mark-exec-test-'));
+      const fileUri = vscode.Uri.file(join(tempDir, 'test-script'));
+
+      await writeFile(fileUri.fsPath, '#!/usr/bin/env bash\necho "hello"\n', {
+        mode: 0o644,
+      });
+
+      // Save while untrusted — should not chmod
+      const document = await vscode.workspace.openTextDocument(fileUri);
+      const editor = await vscode.window.showTextDocument(document, {
+        preview: false,
+      });
+      await editor.edit((editBuilder) => {
+        editBuilder.insert(
+          new vscode.Position(editor.document.lineCount, 0),
+          '# first save\n'
+        );
+      });
+      await editor.document.save();
+
+      await waitForStable(
+        async () => ((await stat(fileUri.fsPath)).mode & 0o111) === 0
+      );
+      assert.strictEqual(
+        (await stat(fileUri.fsPath)).mode & 0o111,
+        0,
+        'Should not be executable while untrusted'
+      );
+
+      // Grant trust mid-session
+      trusted = true;
+
+      // Save again — should now chmod
+      await editor.edit((editBuilder) => {
+        editBuilder.insert(
+          new vscode.Position(editor.document.lineCount, 0),
+          '# second save\n'
+        );
+      });
+      await editor.document.save();
+
+      await waitFor(
+        async () => ((await stat(fileUri.fsPath)).mode & 0o111) !== 0
+      );
+
+      const finalStat = await stat(fileUri.fsPath);
+      assert.ok(
+        (finalStat.mode & 0o111) !== 0,
+        'File should be executable after trust is granted'
+      );
+
+      await vscode.commands.executeCommand(
+        'workbench.action.closeActiveEditor'
+      );
+      await rm(tempDir, { force: true, recursive: true });
+    });
+  });
+
   suite('manual command', () => {
     test('makes file executable when command is run', async () => {
       configEnabled = true;
